@@ -1,9 +1,8 @@
 "use client"
 
 import { useState } from "react";
-import { auth } from "@/lib/firebase";
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { loginWithGoogle, loginWithEmail } from "@/modules/auth/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -18,31 +17,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const createSession = async (idToken: string) => {
-    const res = await fetch("/api/session", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to create session.");
-    }
-  };
-
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-
-      await createSession(idToken);
-
+      await loginWithGoogle();
       toast.success("Login success.");
-
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
@@ -56,21 +35,13 @@ export default function LoginPage() {
   const handleEmailLogin = async () => {
     try {
       setLoading(true);
-
-      const result = await signInWithEmailAndPassword(auth, email, password);
-
-      const idToken = await result.user.getIdToken();
-      await createSession(idToken);
-
+      await loginWithEmail(email, password);
       toast.success("Login success.");
-
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
       console.error(error);
-
       let message = "Incorrect credentials.";
-
       toast.error(message);
     } finally {
       setLoading(false);

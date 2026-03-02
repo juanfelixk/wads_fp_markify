@@ -1,3 +1,4 @@
+import "server-only";
 import { cookies } from "next/headers";
 import { adminAuth } from "@/lib/firebase-admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
@@ -8,11 +9,10 @@ export async function getSession(): Promise<DecodedIdToken | null> {
 
   if (!session) {
     return null;
-  };
+  }
 
   try {
-    const decodedToken = await adminAuth.verifyIdToken(session, true);
-    return decodedToken;
+    return await adminAuth.verifyIdToken(session, true);
   } catch {
     return null;
   }

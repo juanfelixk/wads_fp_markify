@@ -21,6 +21,7 @@ export default async function DashboardPage() {
 
     return (
         <div>
+            <h1>Welcome {decodedToken.email}!</h1>
             <LogoutButton />
             <ul>
                 <li>{decodedToken.email}</li>
