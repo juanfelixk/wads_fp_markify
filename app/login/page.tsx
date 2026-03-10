@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import Image from "next/image";
-import { CircleCheckBig, FileText, PencilLine, Eye, EyeOff } from "lucide-react";
+import { CircleCheckBig, FileText, PencilLine, Eye, EyeOff, Circle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,8 +50,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-[35%_65%]">
-        {/* LEFT PANEL — Large screens only */}
-        <div className="hidden lg:flex flex-col justify-center bg-primary text-primary-foreground px-20 border-r border-primary-foreground/10 select-none">
+        {/* Left Panel - Large Screens Only */}
+        <div className="hidden lg:flex flex-col justify-center bg-primary text-primary-foreground px-20 border-r border-primary-foreground/10 select-none relative overflow-hidden">
+
+            <Circle className="absolute -top-20 -left-20 w-[400px] h-[400px] text-white/10" strokeWidth={.1} />
+            <Circle className="absolute bottom-[-250px] right-[-200px] w-[700px] h-[700px] text-white/10" strokeWidth={.1} />
+
             <div className="max-w-md space-y-11">
                 <div className="space-y-8">
                     <div>
@@ -90,10 +94,10 @@ export default function LoginPage() {
             </div>
         </div>
 
-        {/* RIGHT PANEL */}
+        {/* Right Panel */}
         <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background">
         <div className="w-full max-w-md space-y-8">
-            {/* Mobile Branding */}
+            {/* Mobile Only */}
             <div className="lg:hidden flex items-center justify-center select-none">
                 <Image src={"/logo-full.png"} alt="Markify Logo" height={0} width={260} />
             </div>
