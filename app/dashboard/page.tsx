@@ -1,33 +1,23 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { adminAuth } from "@/lib/firebase-admin";
+import { getSession } from "@/modules/auth/server";
 import LogoutButton from "@/components/logout-button";
 
 export default async function DashboardPage() {
-    const cookieStore = await cookies();
-    const session = cookieStore.get("session")?.value;
+    const session = await getSession();
 
     if (!session) {
-        redirect("/login");
-    }
-
-    let decodedToken;
-
-    try {
-        decodedToken = await adminAuth.verifyIdToken(session, true);
-    } catch {
-        redirect("/login");
+        redirect("/auth/login");
     }
 
     return (
         <div>
-            <h1>Welcome {decodedToken.email}!</h1>
-            <LogoutButton />
+            <h1>Welcome {session.user.name}!</h1>
             <ul>
-                <li>{decodedToken.email}</li>
-                <li>{decodedToken.uid}</li>
-                <li>{decodedToken.email_verified? "Yes" : "No"}</li>
+                <li>Email: {session.user.email}</li>
+                <li>User ID: {session.user.id}</li>
+                <li>Email Verified: {session.user.emailVerified ? "Yes" : "No"}</li>
             </ul>
+            <LogoutButton />
         </div>
-    )
+    );
 }

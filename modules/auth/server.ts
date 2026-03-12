@@ -1,19 +1,11 @@
 import "server-only";
-import { cookies } from "next/headers";
-import { adminAuth } from "@/lib/firebase-admin";
-import type { DecodedIdToken } from "firebase-admin/auth";
+import { auth } from "@/modules/auth/config";
+import { headers } from "next/headers";
 
-export async function getSession(): Promise<DecodedIdToken | null> {
-  const cookieStore = await cookies();
-  const session = cookieStore.get("session")?.value;
+export async function getSession() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  if (!session) {
-    return null;
-  }
-
-  try {
-    return await adminAuth.verifyIdToken(session, true);
-  } catch {
-    return null;
-  }
+  return session; // { user, session } or null
 }

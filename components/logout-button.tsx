@@ -15,30 +15,32 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { authClient } from "@/modules/auth/client";
 
 export default function LogoutButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
-    try {
-      setLoading(true);
-
-      const res = await fetch("/api/logout", {
-        method: "POST",
-      });
-
-      if (!res.ok) throw new Error("Failed to logout.");
-
-      toast.success("Successfully logged out.");
-
-      router.push("/login");
-      router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
+  try {
+    setLoading(true);
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          toast.success("Successfully logged out.");
+          router.push("/auth/login");
+          router.refresh();
+        },
+        onError: () => {
+          toast.error("Failed to logout.");
+        },
+      },
+    });
+  } catch (error: any) {
+    toast.error(error.message || "Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
   };
 
   return (

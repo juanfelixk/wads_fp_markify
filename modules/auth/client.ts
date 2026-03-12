@@ -1,28 +1,25 @@
-import { auth } from "@/lib/firebase";
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from "firebase/auth";
+import { createAuthClient } from "better-auth/react";
 
-export async function createSession(idToken: string) {
-  const res = await fetch("/api/session", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to create session.");
-  }
-}
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  basePath: "/api/v1/auth",
+});
 
 export async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const idToken = await result.user.getIdToken();
-  await createSession(idToken);
+  await authClient.signIn.social({
+    provider: "google",
+    callbackURL: "/dashboard",
+  });
 }
 
 export async function loginWithEmail(email: string, password: string) {
-  const result = await signInWithEmailAndPassword(auth, email, password);
-  const idToken = await result.user.getIdToken();
-  await createSession(idToken);
+  const result = await authClient.signIn.email({
+    email,
+    password,
+    callbackURL: "/dashboard",
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
 }
