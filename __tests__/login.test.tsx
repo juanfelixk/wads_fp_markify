@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import LoginPage from "@/app/login/page";
+import LoginPage from "@/app/auth/login/page";
 import * as authClient from "@/modules/auth/client";
 
 jest.mock("@/modules/auth/client", () => ({

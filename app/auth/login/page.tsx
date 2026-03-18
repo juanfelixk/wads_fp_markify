@@ -21,7 +21,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       await loginWithGoogle();
-      toast.success("Logging in...");
+      toast.info("Logging in...");
     } catch (error: any) {
       console.error(error);
       toast.error(error.message || "Login failed.");
@@ -56,7 +56,7 @@ export default function LoginPage() {
 
                 <div className="space-y-2 select-none">
                     <h2 className="text-2xl font-semibold">
-                        Welcome back
+                        Welcome Back
                     </h2>
                     <p className="text-sm text-muted-foreground">
                         Sign in to continue to Markify
