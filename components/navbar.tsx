@@ -56,8 +56,8 @@ export default function Navbar({ userName }: { userName: string }) {
                 <div className="hidden md:flex items-center justify-center gap-2">
                     {navItems.map(({ label, icon: Icon, href }) => (
                         <Button key={href} variant="ghost" size="lg" className={cn("gap-2 cursor-pointer", pathname === href ? "bg-primary/20 text-primary hover:bg-primary/30" : "hover:bg-foreground/10 text-muted-foreground")} onClick={() => router.push(href)}>
-                        <Icon className="w-4 h-4" />
-                        {label}
+                            <Icon className="w-4 h-4" />
+                            {label}
                         </Button>
                     ))}
                 </div>
@@ -65,7 +65,7 @@ export default function Navbar({ userName }: { userName: string }) {
                 <div className="flex items-center justify-end">
                     {/* DESKTOP */}
                     <div className="hidden md:flex items-center">
-                        <button className="cursor-pointer rounded-full overflow-hidden w-8 h-8 hover:opacity-80 transition-opacity mr-3.5" onClick={() => router.push("/dashboard/student/profile")}>
+                        <button className="cursor-pointer rounded-full overflow-hidden w-8 h-8 hover:opacity-80 transition-opacity mr-3.5" onClick={() => router.push("/dashboard/profile")}>
                             <Image src={getAvatarUrl(userName)} alt="Profile" width={32} height={32} className="rounded-full" />
                         </button>
                         <div className="w-px h-5 bg-foreground/20" />
@@ -92,7 +92,7 @@ export default function Navbar({ userName }: { userName: string }) {
                     </div>
                     {/* MOBILE */}
                     <div className="flex md:hidden items-center gap-2">
-                        <button className="cursor-pointer rounded-full overflow-hidden w-8 h-8 hover:opacity-80 transition-opacity" onClick={() => router.push("/dashboard/student/profile")}>
+                        <button className="cursor-pointer rounded-full overflow-hidden w-8 h-8 hover:opacity-80 transition-opacity" onClick={() => router.push("/dashboard/profile")}>
                             <Image src={getAvatarUrl(userName)} alt="Profile" width={32} height={32} className="rounded-full" />
                         </button>
                         <DropdownMenu>

@@ -3,7 +3,7 @@
 import { Eye, Trash2, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Course } from "@/modules/courses/types";
+import { ClassSummary } from "@/modules/classes/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,13 +33,13 @@ function getAccentColor(courseId: string): string {
 }
 
 interface ClassCardProps {
-    cls: Course;
+    cls: ClassSummary;
     onView: () => void;
     onDelete: () => void;
 }
 
 export default function ClassCard({ cls, onView, onDelete }: ClassCardProps) {
-    const color = getAccentColor(cls.courseId);
+    const color = getAccentColor(cls.classId);
 
     return (
         <Card className="group relative overflow-hidden hover:shadow-md transition-shadow duration-200 pt-0">
@@ -47,10 +47,10 @@ export default function ClassCard({ cls, onView, onDelete }: ClassCardProps) {
 
             <CardHeader className="pt-2">
                 <span className="inline-block text-xs font-mono font-medium px-2 py-0.5 rounded mb-2 w-fit bg-secondary text-secondary-foreground">
-                    {cls.id}
+                    {cls.courseCode} — {cls.classCode}
                 </span>
                 <CardTitle className="text-lg leading-snug font-bold">
-                    <h2>{cls.name}</h2>
+                    <h2>{cls.courseName}</h2>
                 </CardTitle>
             </CardHeader>
 
@@ -83,7 +83,7 @@ export default function ClassCard({ cls, onView, onDelete }: ClassCardProps) {
                         <AlertDialogHeader className="select-none">
                             <AlertDialogTitle>Drop Class</AlertDialogTitle>
                             <AlertDialogDescription className="my-2">
-                                Are you sure you want to drop <span className="font-medium text-foreground">{cls.name}</span>? This action cannot be undone.
+                                Are you sure you want to drop <span className="font-medium text-foreground">{cls.courseName}</span>? This action cannot be undone.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
