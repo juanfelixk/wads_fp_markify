@@ -9,31 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { fetchClassDetail } from "@/modules/assignments/client";
-import { ClassDetail, Assignment, AssignmentStatus } from "@/modules/assignments/types";
+import { ClassDetail, Assignment } from "@/modules/assignments/types";
 import { toast } from "sonner";
-
-const statusConfig: Record<AssignmentStatus, { label: string; className: string }> = {
-    NOT_SUBMITTED: {
-        label: "Not Submitted",
-        className:
-        "border-muted-foreground/30 text-muted-foreground bg-muted/40",
-    },
-    SUBMITTED: {
-        label: "Submitted",
-        className:
-        "border-blue-400/40 text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/40",
-    },
-    REVISED: {
-        label: "Revised",
-        className:
-        "border-amber-400/40 text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/40",
-    },
-    GRADED: {
-        label: "Graded",
-        className:
-        "border-green-400/40 text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/40",
-    },
-};
+import { getAccentColor } from "@/lib/accent-color";
+import { statusConfig } from "@/modules/assignments/constants";
 
 function formatDateTime(iso: string) {
     return new Date(iso).toLocaleString("en-US", {
@@ -153,7 +132,7 @@ export default function StudentCoursePage() {
             ) : (
                 <div className="space-y-3">
                     {detail.assignments.map((assignment, i) => (
-                        <AssignmentRow key={assignment.id} assignment={assignment} index={i} classId={classId} />
+                        <AssignmentCard key={assignment.id} assignment={assignment} index={i} classId={classId} />
                     ))}
                 </div>
             )}
@@ -161,15 +140,16 @@ export default function StudentCoursePage() {
     );
 }
 
-function AssignmentRow({ assignment, index, classId }: { assignment: Assignment; index: number; classId: string; }) {
+function AssignmentCard({ assignment, index, classId }: { assignment: Assignment; index: number; classId: string; }) {
     const status = statusConfig[assignment.status];
     const deadlineState = getDeadlineState(assignment.endDate);
     const isNotSubmitted = assignment.status === "NOT_SUBMITTED";
 
     return (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 + index * 0.06 }}>
-            <Card className="hover:shadow-md transition-shadow duration-200">
-                <CardContent className="px-6 sm:py-3">
+            <Card className="hover:shadow-md transition-shadow duration-200 relative overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-2 h-full" style={{ backgroundColor: `hsl(${getAccentColor(classId)})` }} />
+                <CardContent className="px-8">
                     {/* mobile: stacked, sm+: side by side */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                         {/* left: title + dates */}
@@ -178,11 +158,11 @@ function AssignmentRow({ assignment, index, classId }: { assignment: Assignment;
                                 {assignment.title}
                             </p>
                             <div className="flex flex-col sm:flex-row sm:flex-wrap gap-y-0.5 text-sm sm:text-xs text-muted-foreground">
-                                <span className="sm:mr-5">
+                                <span className="sm:mr-5 sm:w-[150px]">
                                     <span className="font-medium text-foreground/70">Start:</span>{" "}
                                     {formatDateTime(assignment.startDate)}
                                 </span>
-                                <span className={`sm:mr-5 ${
+                                <span className={`sm:mr-5 sm:w-[200px] ${
                                     isNotSubmitted && deadlineState === "overdue"
                                         ? "text-red-500 dark:text-red-400"
                                         : isNotSubmitted && deadlineState === "soon"

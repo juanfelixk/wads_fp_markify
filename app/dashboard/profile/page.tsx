@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { authClient } from "@/modules/auth/client";
+import { motion } from "framer-motion";
 
 export default function ProfilePage() {
     const { data: session, refetch } = authClient.useSession();
@@ -81,14 +82,14 @@ export default function ProfilePage() {
             ? "flex flex-col items-center justify-center min-h-[calc(100vh-9rem)] px-4"
             : "flex flex-col items-center justify-center min-h-[calc(100vh-13rem)] px-4"
         }>
-            <div className="w-full max-w-lg space-y-4">
-                <div className="mb-4">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="w-full max-w-lg space-y-4">
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4">
                     <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
                     <p className="text-sm text-muted-foreground mt-1">Manage your account details</p>
-                </div>
+                </motion.div>
 
-                {/* Name */}
-                <div className="border border-border rounded-lg p-6 space-y-4 bg-card">
+                {/* name */}
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} className="border border-border rounded-lg p-6 space-y-4 bg-card">
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-foreground select-none">Full Name</label>
                         <Input type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={nameLoading} className="h-10" placeholder="Your full name" />
@@ -96,11 +97,11 @@ export default function ProfilePage() {
                     <Button className="w-full h-10 cursor-pointer" onClick={handleNameUpdate} disabled={nameLoading}>
                         {nameLoading ? "Saving..." : "Save Name"}
                     </Button>
-                </div>
+                </motion.div>
 
-                {/* Password */}
+                {/* password */}
                 {hasPassword && (
-                    <div className="border border-border rounded-lg p-6 space-y-4 bg-card">
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.2 }} className="border border-border rounded-lg p-6 space-y-4 bg-card">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">Current Password</label>
                             <div className="relative">
@@ -134,9 +135,9 @@ export default function ProfilePage() {
                         <Button className="w-full h-10 cursor-pointer" onClick={handlePasswordChange} disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}>
                             {passwordLoading ? "Updating..." : "Update Password"}
                         </Button>
-                    </div>
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
         </div>
     );
 }

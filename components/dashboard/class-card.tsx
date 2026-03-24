@@ -15,22 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-const ACCENT_COLORS = [
-    "220 60% 35%",
-    "160 45% 30%",
-    "280 40% 35%",
-    "35 55% 40%",
-    "340 45% 40%",
-    "190 50% 30%",
-    "0 50% 40%",
-    "250 45% 40%",
-];
-
-function getAccentColor(courseId: string): string {
-    const sum = courseId.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return ACCENT_COLORS[sum % ACCENT_COLORS.length];
-}
+import { getAccentColor } from "@/lib/accent-color";
 
 interface ClassCardProps {
     cls: ClassSummary;

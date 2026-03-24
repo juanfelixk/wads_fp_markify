@@ -24,3 +24,15 @@ export interface ClassDetail {
     institution: string;
     assignments: Assignment[];
 }
+
+export interface CalendarAssignment {
+    id: string;
+    title: string;
+    classId: string;
+    classCode: string;
+    courseCode: string;
+    courseName: string;
+    startDate: string;
+    endDate: string;
+    status: AssignmentStatus;
+}

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { enrollInClass } from "@/modules/classes/client";
+import { motion } from "framer-motion";
 
 export default function EnrollPage() {
     const router = useRouter();
@@ -41,13 +42,13 @@ export default function EnrollPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-8.3rem)] px-4">
-            <div className="w-full max-w-lg space-y-4 -translate-y-10">
-                <div className="mb-4">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="w-full max-w-lg space-y-4 -translate-y-10">
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4">
                     <h1 className="text-2xl font-semibold tracking-tight">Enroll in a Class</h1>
                     <p className="text-sm text-muted-foreground mt-1">Enter your class details provided by your lecturer.</p>
-                </div>
+                </motion.div>
 
-                <div className="border border-border rounded-lg p-6 space-y-4 bg-card">
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} className="border border-border rounded-lg p-6 space-y-4 bg-card">
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-foreground select-none">Course Code</label>
                         <Input type="text" placeholder="e.g. CS101" value={courseCode} onChange={(e) => setCourseCode(e.target.value)} disabled={loading} className="h-10" />
@@ -67,8 +68,8 @@ export default function EnrollPage() {
                     <Button className="w-full h-10 cursor-pointer" onClick={handleSubmit} disabled={loading || !courseCode || !classCode || !academicYear || !enrollmentKey}>
                         {loading ? "Enrolling..." : "Enroll"}
                     </Button>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     );
 }
