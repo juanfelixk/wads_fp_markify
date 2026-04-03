@@ -17,6 +17,7 @@ enum SubmissionStatus {
   SUBMITTED
   REVISED
   GRADED
+  SUBMITTED_LATE
 }
 
 model User {
@@ -33,7 +34,7 @@ model User {
   sessions        Session[]
   lecturerClasses Class[]      @relation("LecturerClasses")
   enrollments     Enrollment[] @relation("StudentEnrollments")
-  submissions   Submission[] @relation("StudentSubmissions")
+  submissions     Submission[] @relation("StudentSubmissions")
 }
 
 model Session {
@@ -130,20 +131,21 @@ model Enrollment {
 }
 
 model Assignment {
-  id          String   @id @default(cuid())
-  title       String
+  id           String   @id @default(cuid())
+  title        String
   instructions String?
-  maxPoints   Int?
-  rubric      Json?
+  maxPoints    Int?
+  rubric       Json?
+  lateAllowed Boolean? @default(false)
 
-  classId     String
-  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
-  submissions Submission[]
+  classId      String
+  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  submissions  Submission[]
 
-  startDate   DateTime
-  endDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  startDate    DateTime
+  endDate      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([classId])
 }
@@ -151,16 +153,18 @@ model Assignment {
 model Submission {
   id           String           @id @default(cuid())
   status       SubmissionStatus @default(NOT_SUBMITTED)
-  content      String?
   fileUrl      String?
+  fileName     String?
+  fileSize     Int?
   aiScore      Int?
   finalScore   Int?
   comment      String?
 
   assignmentId String
-  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  assignment   Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   studentId    String
-  student      User       @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  student      User               @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  versions     SubmissionVersion[]
 
   submittedAt  DateTime?
   updatedAt    DateTime  @updatedAt
@@ -169,4 +173,19 @@ model Submission {
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
   @@index([studentId])
+}
+
+// tracks every file upload for a submission for full revision history
+model SubmissionVersion {
+  id           String   @id @default(cuid())
+  version      Int
+  fileUrl      String
+  fileName     String
+  fileSize     Int
+  uploadedAt   DateTime @default(now())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
 }

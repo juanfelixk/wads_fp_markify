@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { enrollInCourse } from "@/modules/classes/client";
+import { enrollInClass } from "@/modules/classes/client";
 import Image from "next/image";
 
 export default function OnboardingPage() {
@@ -30,7 +30,7 @@ export default function OnboardingPage() {
         if (error) { toast.error(error); return; }
         try {
             setLoading(true);
-            await enrollInCourse(courseCode.trim(), classCode.trim(), academicYear.trim(), enrollmentKey.trim());
+            await enrollInClass(courseCode.trim(), classCode.trim(), academicYear.trim(), enrollmentKey.trim());
             toast.success("Successfully enrolled! Welcome.");
             router.push("/dashboard/student");
         } catch (err: unknown) {

@@ -1,8 +1,11 @@
+import { SubmissionData } from "../submissions/types";
+
 export type AssignmentStatus =
     | "NOT_SUBMITTED"
     | "SUBMITTED"
     | "REVISED"
-    | "GRADED";
+    | "GRADED"
+    | "SUBMITTED_LATE";
 
 export interface Assignment {
     id: string;
@@ -12,17 +15,7 @@ export interface Assignment {
     startDate: string;
     endDate: string;
     status: AssignmentStatus;
-}
- 
-export interface ClassDetail {
-    classId: string;
-    classCode: string;
-    academicYear: string;
-    courseName: string;
-    courseCode: string;
-    lecturerName: string;
-    institution: string;
-    assignments: Assignment[];
+    lateAllowed: boolean | null;
 }
 
 export interface CalendarAssignment {
@@ -35,4 +28,33 @@ export interface CalendarAssignment {
     startDate: string;
     endDate: string;
     status: AssignmentStatus;
+}
+
+export interface RubricCriterion {
+    name: string;
+    description: string;
+    maxPoints: number;
+    weight: number;
+}
+
+export interface AssignmentPageData {
+    id: string;
+    title: string;
+    instructions: string | null;
+    maxPoints: number | null;
+    rubric: RubricCriterion[] | null;
+    startDate: string;
+    endDate: string;
+    lateAllowed: boolean | null;
+ 
+    // breadcrumb
+    classId: string;
+    classCode: string;
+    academicYear: string;
+    courseId: string;
+    courseName: string;
+    courseCode: string;
+    lecturerName: string | null;
+ 
+    submission: SubmissionData | null;
 }

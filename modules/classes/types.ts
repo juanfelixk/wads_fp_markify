@@ -1,3 +1,5 @@
+import { Assignment } from "../assignments/types";
+
 export interface ClassSummary {
     classId: string;
     courseCode: string;
@@ -7,4 +9,15 @@ export interface ClassSummary {
     academicYear: string;
     lecturer: string;
     students: number;
+}
+
+export interface ClassDetail {
+    classId: string;
+    classCode: string;
+    academicYear: string;
+    courseName: string;
+    courseCode: string;
+    lecturerName: string;
+    institution: string;
+    assignments: Assignment[];
 }

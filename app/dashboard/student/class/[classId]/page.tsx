@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { fetchClassDetail } from "@/modules/assignments/client";
-import { ClassDetail, Assignment } from "@/modules/assignments/types";
+import { Assignment } from "@/modules/assignments/types";
+import { ClassDetail } from "@/modules/classes/types";
 import { toast } from "sonner";
 import { getAccentColor } from "@/lib/accent-color";
 import { statusConfig } from "@/modules/assignments/constants";
@@ -33,12 +34,13 @@ function getDeadlineState(endDate: string): "overdue" | "soon" | "OK" {
     return "OK";
 }
 
-export default function StudentCoursePage() {
+export default function StudentClassPage() {
     const router = useRouter();
     const params = useParams();
     const classId = params.classId as string;
     const [detail, setDetail] = useState<ClassDetail | null>(null);
     const [loading, setLoading] = useState(true);
+    const accentColor = getAccentColor(classId);
 
     useEffect(() => {
         fetchClassDetail(classId)
@@ -83,6 +85,8 @@ export default function StudentCoursePage() {
                     Back to Dashboard
                 </Button>
             </motion.div>
+
+            <div className="h-1.5 w-24 rounded-full mb-4" style={{ backgroundColor: `hsl(${accentColor})` }} />
 
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
@@ -198,7 +202,7 @@ function AssignmentCard({ assignment, index, classId }: { assignment: Assignment
                             <Badge variant="outline" className={`text-xs font-medium px-2.5 py-1 ${status.className}`}>
                                 {status.label}
                             </Badge>
-                            <Link href={`/dashboard/student/course/${classId}/assignment/${assignment.id}`}>
+                            <Link href={`/dashboard/student/class/${classId}/assignment/${assignment.id}`}>
                                 <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer">
                                     <Eye className="w-3.5 h-3.5" />
                                     View

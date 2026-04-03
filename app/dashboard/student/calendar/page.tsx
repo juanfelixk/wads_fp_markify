@@ -94,13 +94,13 @@ export default function CalendarPage() {
                 {/* calendar */}
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="lg:col-span-2">
                     <Card className="border-border">
-                        <CardContent className="p-4 sm:p-6">
+                        <CardContent>
                             {/* month */}
                             <div className="flex items-center justify-between mb-5">
                                 <Button variant="ghost" size="icon" onClick={prevMonth} className="cursor-pointer hover:bg-foreground/10">
                                     <ChevronLeft className="w-4 h-4" />
                                 </Button>
-                                <h2 className="text-base font-semibold text-foreground">
+                                <h2 className="text-lg sm:text-base font-semibold text-foreground">
                                     {MONTHS[currentMonth]} {currentYear}
                                 </h2>
                                 <Button variant="ghost" size="icon" onClick={nextMonth} className="cursor-pointer hover:bg-foreground/10">
@@ -131,13 +131,13 @@ export default function CalendarPage() {
                                     return (
                                         <button key={day} onClick={() => setSelectedDate(dateKey)}
                                             className={`aspect-square p-1 rounded-lg flex flex-col items-center justify-start gap-0.5 transition-colors text-sm border cursor-pointer
-                                                ${isToday ? "bg-primary/10 font-bold text-primary border-primary/30" : "text-foreground hover:bg-muted border-transparent"}
+                                                ${isToday ? "bg-primary/10 font-bold text-primary" : "text-foreground hover:bg-muted border-transparent"}
                                                 ${isSelected ? "border-primary! bg-primary/5 ring-1 ring-primary/50" : ""}`}>
-                                            <span className="text-xs sm:text-sm">{day}</span>
+                                            <span className="text-sm">{day}</span>
                                             {!loading && dayAssignments.length > 0 && (
                                                 <div className="flex gap-0.5 flex-wrap justify-center">
                                                     {dayAssignments.slice(0, 3).map((a) => (
-                                                        <span key={a.id} className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: `hsl(${getAccentColor(a.classId)})` }} />
+                                                        <span key={a.id} className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full shrink-0" style={{ backgroundColor: `hsl(${getAccentColor(a.classId)})` }} />
                                                     ))}
                                                 </div>
                                             )}
@@ -155,7 +155,7 @@ export default function CalendarPage() {
                         <CardContent>
                             <div className="flex items-center gap-2 mb-4">
                                 <CalendarDays className="w-4 h-4 text-muted-foreground" />
-                                <h3 className="font-semibold text-foreground text-sm">
+                                <h3 className="font-semibold text-foreground text-base">
                                     {new Date(selectedDate + "T00:00:00").toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}
                                 </h3>
                             </div>
@@ -174,8 +174,8 @@ export default function CalendarPage() {
                                                 <div className="rounded-lg border border-border p-3 space-y-2 relative overflow-hidden">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1.5 h-full rounded-l-lg" style={{ backgroundColor: `hsl(${accentColor})` }} />
                                                     <div className="pl-3">
-                                                        <p className="text-sm font-medium text-foreground truncate">{a.title}</p>
-                                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                                        <p className="text-base sm:text-sm font-medium text-foreground truncate">{a.title}</p>
+                                                        <p className="text-sm sm:text-xs text-muted-foreground mt-0.5">
                                                             {a.courseName} · {a.courseCode} · {a.classCode}
                                                         </p>
                                                     </div>
@@ -183,7 +183,7 @@ export default function CalendarPage() {
                                                         <Badge variant="outline" className={`text-xs font-medium select-none ${status.className}`}>
                                                             {status.label}
                                                         </Badge>
-                                                        <Button variant="outline" size="sm" className="text-xs h-7 cursor-pointer hover:bg-foreground/10" onClick={() => router.push(`/dashboard/student/course/${a.classId}/assignment/${a.id}`)}>
+                                                        <Button variant="outline" size="sm" className="text-xs h-7 cursor-pointer hover:bg-foreground/10" onClick={() => router.push(`/dashboard/student/class/${a.classId}/assignment/${a.id}`)}>
                                                             View
                                                         </Button>
                                                     </div>

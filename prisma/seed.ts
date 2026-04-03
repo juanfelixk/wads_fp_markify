@@ -35,13 +35,15 @@ const ASSIGNMENTS = (courseCode: string) => [
     maxPoints: 100,
     startDate: d(-14),
     endDate: d(-7),
+    lateAllowed: true,
   },
   {
     title: "Assignment 2 — Core Concepts",
     instructions: `Demonstrate understanding of core concepts in ${courseCode}. Include examples.`,
     maxPoints: 100,
     startDate: d(-5),
-    endDate: d(2),
+    endDate: d(-2),
+    lateAllowed: false,
   },
   {
     title: "Assignment 3 — Final Project",
@@ -49,6 +51,7 @@ const ASSIGNMENTS = (courseCode: string) => [
     maxPoints: 150,
     startDate: d(3),
     endDate: d(21),
+    lateAllowed: false,
   },
 ];
 
