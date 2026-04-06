@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/modules/auth/server";
 import Image from "next/image";
-import { CircleCheckBig, FileText, PencilLine, Eye, EyeOff, Circle } from "lucide-react";
+import { CircleCheckBig, FileText, PencilLine, Circle } from "lucide-react";
 
 export default async function AuthLayout({children,}: {children: React.ReactNode;}) {
   const session = await getSession();

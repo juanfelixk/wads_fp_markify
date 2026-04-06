@@ -159,12 +159,15 @@ model Submission {
   aiScore      Int?
   finalScore   Int?
   comment      String?
+  aiGrammarFeedback    Json?   // stores grammar & style analysis results
+  aiStructureFeedback  Json?   // stores essay structure evaluation results
 
   assignmentId String
   assignment   Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
   studentId    String
   student      User               @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
   versions     SubmissionVersion[]
+  annotations  SubmissionAnnotation[]
 
   submittedAt  DateTime?
   updatedAt    DateTime  @updatedAt
@@ -188,4 +191,36 @@ model SubmissionVersion {
   submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
+}
+
+model SubmissionAnnotation {
+  id           String   @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  page         Int       // which page the annotation is on
+  x            Float     // position (percentage-based for responsiveness)
+  y            Float
+  width        Float?    // for highlight/box annotations
+  height       Float?
+  content      String    // the feedback text
+  type         AnnotationType
+  quote String?
+  source       AnnotationSource @default(AI)  // AI or LECTURER
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([submissionId])
+}
+
+enum AnnotationType {
+  PRAISE
+  SUGGESTION
+  ISSUE
+}
+
+enum AnnotationSource {
+  AI
+  LECTURER
 }

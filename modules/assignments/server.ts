@@ -32,32 +32,33 @@ export async function getAssignmentPageData(classId: string, assignmentId: strin
 
     const rawSubmission = await getStudentSubmission(assignmentId, studentId);
 
-let submission = rawSubmission;
+    let submission = rawSubmission;
 
-if (rawSubmission) {
-    const isLate =
-        rawSubmission.submittedAt &&
-        new Date(rawSubmission.submittedAt).getTime() >
-        assignment.endDate.getTime();
+    if (rawSubmission) {
+        const isLate =
+            rawSubmission.submittedAt &&
+            new Date(rawSubmission.submittedAt).getTime() >
+            assignment.endDate.getTime();
 
-    const isRevised =
-        (rawSubmission.revisionHistory?.length ?? 0) > 0;
+        const isRevised =
+            (rawSubmission.revisionHistory?.length ?? 0) > 0;
 
-    let status: SubmissionStatus;
+        let status: SubmissionStatus;
 
-    if (rawSubmission.status === "GRADED") {
-        status = "GRADED"; // preserve
-    } else if (isRevised) {
-        status = isLate ? "SUBMITTED_LATE" : "REVISED";
-    } else {
-        status = isLate ? "SUBMITTED_LATE" : "SUBMITTED";
+        if (rawSubmission.status === "GRADED") {
+            status = "GRADED"; // preserve
+        } else if (isRevised) {
+            status = isLate ? "SUBMITTED_LATE" : "REVISED";
+        } else {
+            status = isLate ? "SUBMITTED_LATE" : "SUBMITTED";
+        }
+
+        submission = {
+            ...rawSubmission,
+            status,
+        };
     }
-
-    submission = {
-        ...rawSubmission,
-        status,
-    };
-}
+    
     return {
         id: assignment.id,
         title: assignment.title,

@@ -1,5 +1,5 @@
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+import Navbar from "@/components/dashboard/navbar";
+import Footer from "@/components/dashboard/footer";
 import { getSession } from "@/modules/auth/server";
 import { getEnrolledClasses } from "@/modules/classes/server";
 import { redirect } from "next/navigation";

@@ -7,15 +7,15 @@ import { ArrowLeft, FileText, Clock, Award, Upload, Eye, Shield, Lock, History, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { fetchAssignmentPageData } from "@/modules/assignments/client";
-import { uploadSubmission, fetchSubmissionFileUrl } from "@/modules/submissions/client";
+import { uploadSubmission } from "@/modules/submissions/client";
 import { statusConfig } from "@/modules/assignments/constants";
 import { getAccentColor } from "@/lib/accent-color";
 import type { AssignmentPageData } from "@/modules/assignments/types";
 import type { SubmissionVersionData } from "@/modules/submissions/types";
+import RubricDialog from "@/components/feedback/rubric-dialog";
 
 // helper
 function formatDateTime(iso: string) {
@@ -150,19 +150,7 @@ function UploadZone({ classId, assignmentId, isBlocked, onUploaded }: {classId: 
 
 // version row (current and history)
 function VersionRow({ version, classId, assignmentId, isCurrent = false }: { version: SubmissionVersionData; classId: string; assignmentId: string; isCurrent?: boolean; }) {
-    const [loading, setLoading] = useState(false);
-
-    async function handleView() {
-        setLoading(true);
-        try {
-            const url = await fetchSubmissionFileUrl(classId, assignmentId);
-            window.open(url, "_blank");
-        } catch {
-            toast.error("Failed to load file.");
-        } finally {
-            setLoading(false);
-        }
-    }
+    const [loading] = useState(false);
 
     return (
         <div className={`flex items-center justify-between p-3 rounded-lg border ${isCurrent ? "bg-muted/40" : "bg-card"}`}>
@@ -171,7 +159,7 @@ function VersionRow({ version, classId, assignmentId, isCurrent = false }: { ver
                     <FileText className={`w-4 h-4 ${isCurrent ? "text-primary" : "text-muted-foreground"}`} />
                 </div>
                 <div className="min-w-0">
-                    <p className={`text-sm ${isCurrent ? "font-medium text-foreground" : "text-foreground"} truncate`}>
+                    <p className={`text-sm ${isCurrent ? "font-medium text-foreground" : "text-foreground"} truncate pr-3 sm:pr-0`}>
                         {version.fileName}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -179,9 +167,9 @@ function VersionRow({ version, classId, assignmentId, isCurrent = false }: { ver
                     </p>
                 </div>
             </div>
-            <Button variant={isCurrent ? "outline" : "ghost"} size="sm" className={`gap-1.5 shrink-0 cursor-pointer ${!isCurrent && "text-muted-foreground"}`} onClick={handleView} disabled={loading}>
+            <Button variant={isCurrent ? "outline" : "ghost"} size="sm" className={`gap-1.5 shrink-0 cursor-pointer ${!isCurrent && "text-muted-foreground"}`} onClick={() => window.open(`/dashboard/student/class/${classId}/assignment/${assignmentId}/feedback`, "_blank")} disabled={loading}>
                 <Eye className="w-3.5 h-3.5" />
-                {isCurrent && <span className="hidden sm:inline">View</span>}
+                {isCurrent && <span className="hidden sm:inline">View Feedback</span>}
             </Button>
         </div>
     );
@@ -233,7 +221,6 @@ export default function AssignmentPage() {
     const isLate = new Date(data.endDate).getTime() < Date.now();
     const lateAllowed = data.lateAllowed ?? false;
     const isSubmissionBlocked = isGraded || (isLate && !lateAllowed);
-    const isSubmittedLate = data.submission?.submittedAt && (new Date(data.submission.submittedAt).getTime() > new Date(data.endDate).getTime());
 
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
@@ -256,7 +243,7 @@ export default function AssignmentPage() {
                     <span className="text-xs text-muted-foreground truncate max-w-[200px]">{data.title}</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-2">
+                <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
                     {data.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
@@ -276,7 +263,7 @@ export default function AssignmentPage() {
                         {status.label}
                     </Badge>
                     {data.submission?.finalScore != null && data.maxPoints != null && (
-                        <span className="text-sm font-semibold text-primary">
+                        <span className="sm:text-sm text-base font-semibold text-primary">
                             {data.submission.finalScore}/{data.maxPoints} pts
                         </span>
                     )}
@@ -425,8 +412,8 @@ export default function AssignmentPage() {
                                         <div className="flex items-start gap-3">
                                             <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                                             <div>
-                                                <p className="text-xs font-medium text-muted-foreground tracking-wide mb-0.5">Grade</p>
-                                                <p className="text-lg font-bold text-primary">
+                                                <p className="text-xs font-medium text-muted-foreground tracking-wide mb-0.5">Final Grade</p>
+                                                <p className="text-xl sm:text-lg font-bold text-primary">
                                                     {data.submission.finalScore}
                                                     <span className="text-sm font-normal text-muted-foreground"> / {data.maxPoints}</span>
                                                 </p>
@@ -439,7 +426,7 @@ export default function AssignmentPage() {
                                     <>
                                         <Separator />
                                         <div>
-                                            <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">Instructor Comment</p>
+                                            <p className="text-xs font-medium text-muted-foreground tracking-wide mb-1">Lecturer Comment</p>
                                             <p className="text-sm text-foreground/80 leading-relaxed">{data.submission.comment}</p>
                                         </div>
                                     </>
@@ -481,32 +468,7 @@ export default function AssignmentPage() {
                 </div>
             </div>
 
-            {/* rubric dialog */}
-            <Dialog open={rubricOpen} onOpenChange={setRubricOpen}>
-                <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                        <DialogTitle>Grading Rubric</DialogTitle>
-                        <DialogDescription>{data.title}</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-3 mt-2">
-                        {data.rubric?.map((criterion, idx) => (
-                            <div key={idx} className="p-4 rounded-lg border bg-muted/30">
-                                <div className="flex items-center justify-between mb-1.5">
-                                    <p className="text-sm font-semibold text-foreground">{criterion.name}</p>
-                                    <Badge variant="secondary" className="text-xs">
-                                        {criterion.maxPoints} pts · {criterion.weight}%
-                                    </Badge>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">{criterion.description}</p>
-                            </div>
-                        ))}
-                        <div className="flex justify-between items-center pt-2 border-t">
-                            <span className="text-sm font-semibold text-foreground">Total</span>
-                            <span className="text-sm font-bold text-primary">{data.maxPoints} points</span>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.title}rubric={data.rubric ?? []} totalPoints={data.maxPoints} />
         </div>
     );
 }
