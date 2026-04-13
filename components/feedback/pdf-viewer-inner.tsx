@@ -4,8 +4,8 @@ import { useState, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Loader2, AlertCircle, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { annotationStyle } from "@/modules/feedback/constants";
-import type { Annotation } from "@/modules/feedback/types";
+import { annotationStyle } from "@/services/feedback/constants";
+import type { Annotation } from "@/services/feedback/types";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",

@@ -168,6 +168,7 @@ model Submission {
   student      User               @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
   versions     SubmissionVersion[]
   annotations  SubmissionAnnotation[]
+  criterionScores SubmissionCriterionScore[]
 
   submittedAt  DateTime?
   updatedAt    DateTime  @updatedAt
@@ -223,4 +224,18 @@ enum AnnotationType {
 enum AnnotationSource {
   AI
   LECTURER
+}
+
+model SubmissionCriterionScore {
+  id             String     @id @default(cuid())
+  submissionId   String
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  criterionName  String     // matches RubricCriterion.name
+  pointsAwarded  Int
+  pointsMax      Int
+  rationale      String     // AI's 1-2 sentence justification
+
+  @@unique([submissionId, criterionName])
+  @@index([submissionId])
 }

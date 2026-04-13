@@ -1,5 +1,5 @@
-import { getSession } from "@/modules/auth/server";
-import { unenrollStudent } from "@/modules/classes/server";
+import { getSession } from "@/services/auth/server";
+import { unenrollStudent } from "@/services/classes/server";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ classId: string }> }) {
     const { classId } = await params;

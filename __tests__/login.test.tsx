@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import LoginPage from "@/app/auth/login/page";
-import * as authClient from "@/modules/auth/client";
+import * as authClient from "@/services/auth/client";
 
 jest.mock("@/modules/auth/client", () => ({
   loginWithEmail: jest.fn(),

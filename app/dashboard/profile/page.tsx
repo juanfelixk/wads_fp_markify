@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { authClient } from "@/modules/auth/client";
+import { authClient } from "@/services/auth/client";
 import { motion } from "framer-motion";
 
 export default function ProfilePage() {

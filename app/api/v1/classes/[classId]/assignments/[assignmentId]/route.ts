@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAssignmentPageData } from "@/modules/assignments/server";
+import { getAssignmentPageData } from "@/services/assignments/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ classId: string, assignmentId: string }> }) {
     const { classId } = await params;

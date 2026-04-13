@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
-import { authClient } from "@/modules/auth/client";
+import { authClient } from "@/services/auth/client";
 
 export default function RegisterPage() {
     const router = useRouter();

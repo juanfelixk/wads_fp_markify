@@ -1,4 +1,5 @@
 import { RubricCriterion } from "../assignments/types";
+import type { SubmissionCriterionScore } from "@/generated/prisma";
 
 export interface FeedbackPageData {
     courseCode: string;
@@ -15,6 +16,7 @@ export interface FeedbackPageData {
     aiStructureFeedback: unknown | null;
     annotations: Annotation[];
     rubric: RubricCriterion[] | null;
+    criterionScores: SubmissionCriterionScore[] | null;
 }
 
 export type AnnotationType = "PRAISE" | "ISSUE" | "SUGGESTION";

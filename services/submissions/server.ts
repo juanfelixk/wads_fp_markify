@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "../auth/server";
 import { SubmissionStatus } from "@/generated/prisma";
 import type { SubmissionData, SubmissionVersionData } from "./types";
+import { gradeSubmission } from "@/services/ai/server";
+import { Prisma } from "@/generated/prisma";
 
 // helper
 function formatVersion(v: {
@@ -28,6 +30,7 @@ export async function getStudentSubmission(assignmentId: string, studentId: stri
         where: { assignmentId_studentId: { assignmentId, studentId } },
         include: {
             versions: { orderBy: { version: "desc" } },
+            criterionScores: true,
         },
     });
     if (!submission) return null;
@@ -42,6 +45,7 @@ export async function getStudentSubmission(assignmentId: string, studentId: stri
         submittedAt: submission.submittedAt?.toISOString() ?? null,
         currentFile: currentVersion ? formatVersion(currentVersion) : null,
         revisionHistory: olderVersions.map(formatVersion),
+        criterionScores: submission.criterionScores ?? [],
     };
 }
 
@@ -105,6 +109,9 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
                 fileName: file.fileName,
                 fileSize: file.fileSize,
                 submittedAt: new Date(),
+                aiScore: null,
+                aiGrammarFeedback: Prisma.JsonNull,
+                aiStructureFeedback: Prisma.JsonNull,
             },
         });
 
@@ -118,6 +125,12 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
             },
         });
         return [sub, ver];
+    });
+
+    void gradeSubmission(assignmentId, studentId, file.fileUrl).then((result) => {
+        if (!result.success) {
+            console.error("[recordSubmissionUpload] grading failed:", result.error);
+        }
     });
 
     return {

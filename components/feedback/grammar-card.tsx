@@ -1,6 +1,6 @@
 "use client";
 
-import { GrammarFeedback } from "@/modules/feedback/types";
+import { GrammarFeedback } from "@/services/feedback/types";
 import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";

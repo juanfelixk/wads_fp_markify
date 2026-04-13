@@ -12,12 +12,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchSubmissionFileUrl } from "@/modules/submissions/client";
-import { getFeedbackPageData } from "@/modules/feedback/server";
-import type { FeedbackPageData } from "@/modules/feedback/types";
-import { statusConfig } from "@/modules/assignments/constants";
-import { annotationStyle } from "@/modules/feedback/constants";
-import { GrammarFeedback, StructureFeedback } from "@/modules/feedback/types";
+import { fetchSubmissionFileUrl } from "@/services/submissions/client";
+import { getFeedbackPageData } from "@/services/feedback/server";
+import type { FeedbackPageData } from "@/services/feedback/types";
+import { statusConfig } from "@/services/assignments/constants";
+import { annotationStyle } from "@/services/feedback/constants";
+import { GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
 import RubricDialog from "@/components/feedback/rubric-dialog";
 import AnnotationSidebar from "@/components/feedback/annotation-sidebar";
 import GrammarCard from "@/components/feedback/grammar-card";
@@ -76,7 +76,7 @@ function ScoresCard({ data }: { data: FeedbackPageData }) {
                     </>
                 )}
             </CardContent>
-            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.assignmentTitle}rubric={data.rubric ?? []} totalPoints={data.maxPoints} />
+            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.assignmentTitle} rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.criterionScores} />
         </Card>
         
     );

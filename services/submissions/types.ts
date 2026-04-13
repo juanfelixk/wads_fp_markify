@@ -1,4 +1,5 @@
 import { SubmissionStatus } from "@/generated/prisma";
+import { SubmissionCriterionScore } from "@/generated/prisma";
  
 export type { SubmissionStatus };
 
@@ -11,6 +12,7 @@ export interface SubmissionData {
     submittedAt: string | null;
     currentFile: SubmissionVersionData | null;
     revisionHistory: SubmissionVersionData[];
+    criterionScores: SubmissionCriterionScore[];
 }
 
 export interface SubmissionVersionData {

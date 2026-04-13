@@ -2,7 +2,8 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { RubricCriterion } from "@/modules/assignments/types";
+import { RubricCriterion } from "@/services/assignments/types";
+import { SubmissionCriterionScore } from "@/generated/prisma";
 
 interface RubricDialogProps {
     open: boolean;
@@ -10,10 +11,15 @@ interface RubricDialogProps {
     title: string;
     rubric: RubricCriterion[];
     totalPoints: number | null;
+    scores?: SubmissionCriterionScore[] | null;
 }
 
-export default function RubricDialog({ open, onOpenChange, title, rubric, totalPoints }: RubricDialogProps) {
+export default function RubricDialog({ open, onOpenChange, title, rubric, totalPoints, scores }: RubricDialogProps) {
     if (!rubric || rubric.length === 0) return null;
+
+    function getScore(name: string) {
+        return scores?.find((s) => s.criterionName === name);
+    }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -24,32 +30,53 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                 </DialogHeader>
 
                 <div className="space-y-3 mt-2">
-                    {rubric.map((criterion, idx) => (
-                        <div key={idx} className="p-4 rounded-lg border bg-muted/30">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <p className="sm:text-sm text-base font-semibold text-foreground">
-                                {criterion.name}
-                                </p>
-                                <Badge variant="secondary" className="text-sm">
-                                {criterion.maxPoints} pts ({criterion.weight}%)
-                                </Badge>
-                            </div>
-                            <p className="sm:text-xs text-sm text-muted-foreground leading-relaxed">
-                                {criterion.description}
-                            </p>
-                        </div>
-                    ))}
+                    <div className="space-y-3 mt-2">
+                        {rubric.map((criterion, idx) => {
+                            const score = getScore(criterion.name);
+
+                            return (
+                                <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-stretch">
+                                    {/* LEFT: rubric content */}
+                                    <div className="p-4 rounded-lg border bg-muted/30">
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <p className="sm:text-sm text-base font-semibold text-foreground">
+                                            {criterion.name}
+                                            </p>
+                                            <Badge variant="secondary" className="text-sm">
+                                            {criterion.maxPoints} pts ({criterion.weight}%)
+                                            </Badge>
+                                        </div>
+
+                                        <p className="sm:text-xs text-sm text-muted-foreground leading-relaxed">
+                                            {criterion.description}
+                                        </p>
+                                    </div>
+
+                                    {/* RIGHT: score box */}
+                                        <div className="flex items-center justify-center min-w-[70px] px-3 rounded-lg border bg-background">
+                                        {score ? (
+                                            <span className="text-base font-bold text-primary tabular-nums">
+                                            {score.pointsAwarded}
+                                            </span>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">—</span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
 
                     {totalPoints != null && (
                         <div className="flex justify-between items-center pt-2 border-t">
                             <span className="sm:text-sm text-base font-semibold text-foreground">
-                                Total
+                            Total
                             </span>
-                            <span className="sm:text-sm text-base font-bold text-primary">
-                                {totalPoints} points
+                            <span className="text-base font-bold text-primary tabular-nums">
+                            {(scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? "-")} / {totalPoints}
                             </span>
                         </div>
-                    )}
+                        )}
                 </div>
             </DialogContent>
         </Dialog>

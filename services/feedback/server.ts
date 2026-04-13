@@ -1,7 +1,7 @@
 "use server";
  
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/modules/auth/server";
+import { getSession } from "@/services/auth/server";
 import type { FeedbackPageData } from "./types";
 import { RubricCriterion } from "../assignments/types";
  
@@ -21,14 +21,15 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
     const submission = await prisma.submission.findUnique({
         where: { assignmentId_studentId: { assignmentId, studentId } },
         include: {
-        assignment: {
-            include: {
-            class: { include: { course: true } },
+            assignment: {
+                include: {
+                class: { include: { course: true } },
+                },
             },
-        },
-        annotations: {
-            orderBy: { page: "asc" },
-        },
+            annotations: {
+                orderBy: { page: "asc" },
+            },
+            criterionScores: true,
         },
     });
     
@@ -54,6 +55,7 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
         aiStructureFeedback: submission.aiStructureFeedback,
 
         rubric: (assignment.rubric as RubricCriterion[] | null) ?? null,
+        criterionScores: submission.criterionScores,
     
         annotations: submission.annotations.map((a) => ({
         id: a.id,

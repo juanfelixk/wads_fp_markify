@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { recordSubmissionUpload } from "@/modules/submissions/server";
+import { recordSubmissionUpload } from "@/services/submissions/server";
 import { uploadFile } from "@/lib/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB

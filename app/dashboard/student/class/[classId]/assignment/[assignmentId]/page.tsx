@@ -9,12 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { fetchAssignmentPageData } from "@/modules/assignments/client";
-import { uploadSubmission } from "@/modules/submissions/client";
-import { statusConfig } from "@/modules/assignments/constants";
+import { fetchAssignmentPageData } from "@/services/assignments/client";
+import { uploadSubmission } from "@/services/submissions/client";
+import { statusConfig } from "@/services/assignments/constants";
 import { getAccentColor } from "@/lib/accent-color";
-import type { AssignmentPageData } from "@/modules/assignments/types";
-import type { SubmissionVersionData } from "@/modules/submissions/types";
+import type { AssignmentPageData } from "@/services/assignments/types";
+import type { SubmissionVersionData } from "@/services/submissions/types";
 import RubricDialog from "@/components/feedback/rubric-dialog";
 
 // helper
@@ -468,7 +468,7 @@ export default function AssignmentPage() {
                 </div>
             </div>
 
-            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.title}rubric={data.rubric ?? []} totalPoints={data.maxPoints} />
+            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.title}rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.submission?.criterionScores ?? null} />
         </div>
     );
 }

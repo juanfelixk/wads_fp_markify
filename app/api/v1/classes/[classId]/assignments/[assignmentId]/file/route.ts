@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/modules/auth/server";
+import { getSession } from "@/services/auth/server";
 import { prisma } from "@/lib/prisma";
-import { getStudentSubmission } from "@/modules/submissions/server";
+import { getStudentSubmission } from "@/services/submissions/server";
 import { getPresignedUrl } from "@/lib/storage";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ classId: string; assignmentId: string }> }) {

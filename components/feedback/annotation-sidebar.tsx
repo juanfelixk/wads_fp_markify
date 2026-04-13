@@ -1,8 +1,8 @@
 "use client";
 
-import { Annotation } from "@/modules/feedback/types";
+import { Annotation } from "@/services/feedback/types";
 import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
-import { annotationStyle } from "@/modules/feedback/constants";
+import { annotationStyle } from "@/services/feedback/constants";
 
 export default function AnnotationSidebar({ annotations, activeId, onSelect }: {
     annotations: Annotation[];

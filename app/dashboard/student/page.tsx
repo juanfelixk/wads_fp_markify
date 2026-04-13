@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import ClassCard from "@/components/dashboard/class-card";
-import { ClassSummary } from "@/modules/classes/types";
-import { fetchEnrolledClasses, dropClass } from "@/modules/classes/client";
+import { ClassSummary } from "@/services/classes/types";
+import { fetchEnrolledClasses, dropClass } from "@/services/classes/client";
 import { toast } from "sonner";
-import { authClient } from "@/modules/auth/client";
+import { authClient } from "@/services/auth/client";
 
 export default function StudentDashboardPage() {
     const router = useRouter();

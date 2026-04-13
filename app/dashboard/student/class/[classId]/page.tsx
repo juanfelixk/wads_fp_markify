@@ -8,12 +8,12 @@ import { ArrowLeft, BookOpen, User, Clock, Eye, AlertCircle } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchClassDetail } from "@/modules/assignments/client";
-import { Assignment } from "@/modules/assignments/types";
-import { ClassDetail } from "@/modules/classes/types";
+import { fetchClassDetail } from "@/services/assignments/client";
+import { Assignment } from "@/services/assignments/types";
+import { ClassDetail } from "@/services/classes/types";
 import { toast } from "sonner";
 import { getAccentColor } from "@/lib/accent-color";
-import { statusConfig } from "@/modules/assignments/constants";
+import { statusConfig } from "@/services/assignments/constants";
 
 function formatDateTime(iso: string) {
     return new Date(iso).toLocaleString("en-US", {

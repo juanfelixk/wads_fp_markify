@@ -56,6 +56,7 @@ export async function getAssignmentPageData(classId: string, assignmentId: strin
         submission = {
             ...rawSubmission,
             status,
+            criterionScores: rawSubmission.criterionScores ?? [],
         };
     }
     

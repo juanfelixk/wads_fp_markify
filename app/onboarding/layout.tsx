@@ -1,5 +1,5 @@
-import { getSession } from "@/modules/auth/server";
-import { getEnrolledClasses } from "@/modules/classes/server";
+import { getSession } from "@/services/auth/server";
+import { getEnrolledClasses } from "@/services/classes/server";
 import { redirect } from "next/navigation";
 
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {

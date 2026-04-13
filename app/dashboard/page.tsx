@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/modules/auth/server";
+import { getSession } from "@/services/auth/server";
  
 export default async function DashboardPage() {
     const session = await getSession();

@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { fetchCalendarAssignments } from "@/modules/assignments/client";
-import { CalendarAssignment } from "@/modules/assignments/types";
+import { fetchCalendarAssignments } from "@/services/assignments/client";
+import { CalendarAssignment } from "@/services/assignments/types";
 import { getAccentColor } from "@/lib/accent-color";
-import { statusConfig } from "@/modules/assignments/constants";
+import { statusConfig } from "@/services/assignments/constants";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/modules/auth/server";
+import { getSession } from "@/services/auth/server";
 import Image from "next/image";
 import { CircleCheckBig, FileText, PencilLine, Circle } from "lucide-react";
 

@@ -30,15 +30,15 @@ const d = (offsetDays: number) => new Date(now.getTime() + offsetDays * 86_400_0
 
 const ASSIGNMENTS = (courseCode: string) => [
   {
-    title: "Assignment 1 — Introduction",
-    instructions: `Submit a brief introduction related to ${courseCode}. Minimum 500 words.`,
+    title: "Reflection Journal",
+    instructions: `Submit a reflection journal related to ${courseCode}. Minimum 500 words.`,
     maxPoints: 100,
     startDate: d(-14),
     endDate: d(-7),
     lateAllowed: true,
   },
   {
-    title: "Assignment 2 — Core Concepts",
+    title: "Core Concepts",
     instructions: `Demonstrate understanding of core concepts in ${courseCode}. Include examples.`,
     maxPoints: 100,
     startDate: d(-5),
@@ -46,9 +46,9 @@ const ASSIGNMENTS = (courseCode: string) => [
     lateAllowed: false,
   },
   {
-    title: "Assignment 3 — Final Project",
+    title: "Final Project",
     instructions: `Final project for ${courseCode}. Present your findings with supporting evidence.`,
-    maxPoints: 150,
+    maxPoints: 100,
     startDate: d(3),
     endDate: d(21),
     lateAllowed: false,

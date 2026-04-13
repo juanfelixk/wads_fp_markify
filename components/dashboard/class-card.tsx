@@ -3,7 +3,7 @@
 import { Eye, Trash2, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClassSummary } from "@/modules/classes/types";
+import { ClassSummary } from "@/services/classes/types";
 import {
   AlertDialog,
   AlertDialogAction,

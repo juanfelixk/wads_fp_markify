@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getAvatarUrl } from "@/lib/avatar";
-import { authClient } from "@/modules/auth/client";
+import { authClient } from "@/services/auth/client";
 import { toast } from "sonner";
 
 export default function Navbar({ userName }: { userName: string }) {

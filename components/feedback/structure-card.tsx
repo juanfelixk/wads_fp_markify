@@ -1,6 +1,6 @@
 "use client";
 
-import { StructureFeedback } from "@/modules/feedback/types";
+import { StructureFeedback } from "@/services/feedback/types";
 import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
