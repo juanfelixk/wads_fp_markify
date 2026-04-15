@@ -12,8 +12,8 @@ interface GrammarCardProps {
 }
 
 export default function GrammarCard({ grammar }: GrammarCardProps) {
-    const [open, setOpen] = useState(true);
-    if (!grammar) {
+    const [open, setOpen] = useState(false);
+    if (!grammar || !grammar.issues?.length) {
         return (
         <Card className="border-dashed">
             <CardContent className="px-5 space-y-4">
@@ -31,18 +31,18 @@ export default function GrammarCard({ grammar }: GrammarCardProps) {
         <Collapsible open={open} onOpenChange={setOpen}>
             <Card>
                 <CollapsibleTrigger asChild>
-                    <CardHeader className="pb-3 cursor-pointer hover:bg-muted/30 transition-colors rounded-t-xl select-none">
+                    <CardHeader className="cursor-pointer transition-colors rounded-t-xl select-none">
                         <CardTitle className="text-base flex items-center justify-between">
-                        <span className="flex items-center gap-2">
-                            <Type className="w-4 h-4 text-primary" /> Grammar & Style
-                            <Badge variant="secondary" className="text-[10px]">{grammar.issues.length}</Badge>
-                        </span>
-                        {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                            <h3 className="flex items-center gap-2">
+                                <Type className="w-4 h-4 text-primary" /> Grammar & Style
+                                <Badge variant="secondary" className="text-[10px]">{grammar.issues.length}</Badge>
+                            </h3>
+                            {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                         </CardTitle>
                     </CardHeader>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                    <CardContent className="space-y-3 pt-0">
+                    <CardContent className="space-y-3 pt-0! mt-0!">
                         {grammar.summary && <p className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-2.5 italic">{grammar.summary}</p>}
                         {grammar.issues.map((issue, i) => (
                             <div key={i} className="p-3 rounded-lg border bg-muted/20 space-y-1.5 text-xs">

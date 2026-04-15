@@ -35,3 +35,67 @@ export async function unenrollStudent(studentId: string, classId: string) {
         },
     });
 }
+
+export async function enrollStudent(studentId: string, courseCode: string, classCode: string, academicYear: string, enrollmentKey: string) {
+    const normalizedCourseCode = courseCode.trim().toUpperCase();
+    const normalizedClassCode = classCode.trim().toUpperCase();
+    const normalizedYear = academicYear.trim();
+    const normalizedKey = enrollmentKey.trim().toLowerCase();
+
+    // check empty fields
+    if (!normalizedCourseCode || !normalizedClassCode || !normalizedYear || !normalizedKey) {
+        throw new Error("All fields are required.");
+    }
+
+    // check course
+    const course = await prisma.course.findUnique({
+        where: { code: normalizedCourseCode },
+    });
+    if (!course) {
+        throw new Error("Course not found.");
+    }
+
+    // check credentials
+    const cls = await prisma.class.findUnique({
+        where: {
+            courseId_code_academicYear: {
+                courseId: course.id,
+                code: normalizedClassCode,
+                academicYear: normalizedYear,
+            },
+        },
+    });
+    if (!cls) {
+        throw new Error("Class not found.");
+    }
+    if (cls.enrollmentKey !== normalizedKey) {
+        throw new Error("Invalid enrollment key.");
+    }
+
+    // check institution
+    const existing = await prisma.enrollment.findFirst({
+        where: { studentId },
+        include: { class: { include: { course: { select: { institution: true } } } } },
+    });
+    if (existing && existing.class.course.institution !== course.institution) {
+        throw new Error("This class belongs to a different institution. Please enroll with a new account for that institution.");
+    }
+
+    // check already enrolled
+    const alreadyEnrolled = await prisma.enrollment.findUnique({
+        where: { studentId_classId: { studentId, classId: cls.id } },
+    });
+    if (alreadyEnrolled) {
+        throw new Error("You are already enrolled in this class.");
+    }
+
+    // create
+    await prisma.enrollment.create({
+        data: {
+        studentId,
+        classId: cls.id,
+        },
+    });
+
+    return { classId: cls.id };
+}

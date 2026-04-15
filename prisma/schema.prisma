@@ -18,6 +18,7 @@ enum SubmissionStatus {
   REVISED
   GRADED
   SUBMITTED_LATE
+  TO_BE_REVIEWED
 }
 
 model User {

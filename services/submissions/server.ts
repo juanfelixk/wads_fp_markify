@@ -4,6 +4,7 @@ import { SubmissionStatus } from "@/generated/prisma";
 import type { SubmissionData, SubmissionVersionData } from "./types";
 import { gradeSubmission } from "@/services/ai/server";
 import { Prisma } from "@/generated/prisma";
+import { uploadFile, getPresignedUrl } from "@/lib/storage";
 
 // helper
 function formatVersion(v: {
@@ -49,7 +50,7 @@ export async function getStudentSubmission(assignmentId: string, studentId: stri
     };
 }
 
-export async function recordSubmissionUpload(classId: string, assignmentId: string, file: { fileName: string; fileSize: number; fileUrl: string }) {
+export async function recordSubmissionUpload(classId: string, assignmentId: string, file: File) {
     const session = await getSession();
     if (!session?.user) throw new Error("Unauthorized");
 
@@ -90,6 +91,14 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
         newStatus = hasExistingSubmission ? SubmissionStatus.REVISED : SubmissionStatus.SUBMITTED;
     }
 
+    // upload to storage
+    const fileUrl = await uploadFile({
+        buffer: Buffer.from(await file.arrayBuffer()),
+        fileName: file.name,
+        mimeType: file.type,
+        folder: `submissions/${classId}/${assignmentId}`,
+    });
+
     // update status and time
     const [submission, version] = await prisma.$transaction(async (tx) => {
         const sub = await tx.submission.upsert({
@@ -98,16 +107,16 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
                 assignmentId,
                 studentId,
                 status: newStatus,
-                fileUrl: file.fileUrl,
-                fileName: file.fileName,
-                fileSize: file.fileSize,
+                fileUrl: fileUrl,
+                fileName: file.name,
+                fileSize: file.size,
                 submittedAt: new Date(),
             },
             update: {
                 status: newStatus,
-                fileUrl: file.fileUrl,
-                fileName: file.fileName,
-                fileSize: file.fileSize,
+                fileUrl: fileUrl,
+                fileName: file.name,
+                fileSize: file.size,
                 submittedAt: new Date(),
                 aiScore: null,
                 aiGrammarFeedback: Prisma.JsonNull,
@@ -119,15 +128,15 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
             data: {
                 submissionId: sub.id,
                 version: nextVersion,
-                fileName: file.fileName,
-                fileSize: file.fileSize,
-                fileUrl: file.fileUrl,
+                fileName: file.name,
+                fileSize: file.size,
+                fileUrl: fileUrl,
             },
         });
         return [sub, ver];
     });
 
-    void gradeSubmission(assignmentId, studentId, file.fileUrl).then((result) => {
+    void gradeSubmission(assignmentId, studentId, fileUrl).then((result) => {
         if (!result.success) {
             console.error("[recordSubmissionUpload] grading failed:", result.error);
         }
@@ -138,4 +147,25 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
         status: submission.status,
         version: formatVersion(version),
     };
+}
+
+export async function getSubmissionFileUrl(classId: string, assignmentId: string, studentId: string) {
+    // verify enrollment
+    const enrollment = await prisma.enrollment.findUnique({
+        where: { studentId_classId: { studentId, classId } },
+    });
+    if (!enrollment) {
+        throw new Error("Forbidden");
+    };
+
+    // verify valid submission
+    const submission = await getStudentSubmission(assignmentId, studentId);
+    if (!submission?.currentFile) {
+        throw new Error("Not found");
+    };
+
+    // get url
+    const url = await getPresignedUrl(submission.currentFile.fileUrl);
+
+    return url;
 }

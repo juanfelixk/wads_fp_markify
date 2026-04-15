@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "../auth/server";
-import type { AssignmentPageData, RubricCriterion } from "./types";
+import type { AssignmentPageData, RubricCriterion, CalendarAssignment } from "./types";
 import { getStudentSubmission } from "../submissions/server";
 import { SubmissionStatus } from "@/generated/prisma";
 
@@ -53,11 +53,10 @@ export async function getAssignmentPageData(classId: string, assignmentId: strin
             status = isLate ? "SUBMITTED_LATE" : "SUBMITTED";
         }
 
-        submission = {
+        submission = rawSubmission ? {
             ...rawSubmission,
-            status,
             criterionScores: rawSubmission.criterionScores ?? [],
-        };
+        } : null;
     }
     
     return {
@@ -80,4 +79,95 @@ export async function getAssignmentPageData(classId: string, assignmentId: strin
 
         submission,
     };
+}
+
+export async function getCalendarAssignments(studentId: string): Promise<CalendarAssignment[]> {
+    const enrollments = await prisma.enrollment.findMany({
+        where: { studentId },
+        include: {
+            class: {
+                include: {
+                    course: true,
+                    assignments: {
+                        include: {
+                            submissions: {
+                                where: { studentId },
+                                select: { status: true },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    const assignments = enrollments.flatMap((e) =>
+        e.class.assignments.map((a) => ({
+            id: a.id,
+            title: a.title,
+            classId: e.class.id,
+            classCode: e.class.code,
+            courseCode: e.class.course.code,
+            courseName: e.class.course.name,
+            startDate: a.startDate.toISOString(),
+            endDate: a.endDate.toISOString(),
+            status: a.submissions[0]?.status ?? "NOT_SUBMITTED",
+        }))
+    );
+
+    return assignments;
+}
+
+export async function getAssignmentsInClass(classId: string, studentId: string) {
+    // verify valid student enrollment
+    const enrollment = await prisma.enrollment.findUnique({
+        where: {
+            studentId_classId: { studentId, classId },
+        },
+    });
+    if (!enrollment) {
+        throw new Error("Forbidden");
+    }
+
+    // check class existence
+    const cls = await prisma.class.findUnique({
+        where: { id: classId },
+        include: {
+            course: true,
+            lecturer: { select: { name: true } },
+            assignments: {
+                orderBy: { endDate: "asc" },
+                include: {
+                    submissions: {
+                        where: { studentId },
+                        select: { status: true },
+                    },
+                },
+            },
+        },
+    });
+    if (!cls) {
+        throw new Error("Not found");
+    }
+
+    const data = {
+        classId: cls.id,
+        classCode: cls.code,
+        academicYear: cls.academicYear,
+        courseName: cls.course.name,
+        courseCode: cls.course.code,
+        lecturerName: cls.lecturer.name ?? "Unknown",
+        institution: cls.course.institution,
+        assignments: cls.assignments.map((a) => ({
+        id: a.id,
+        title: a.title,
+        instructions: a.instructions,
+        maxPoints: a.maxPoints,
+        startDate: a.startDate.toISOString(),
+        endDate: a.endDate.toISOString(),
+        status: a.submissions[0]?.status ?? "NOT_SUBMITTED",
+        })),
+    };
+
+    return data;
 }

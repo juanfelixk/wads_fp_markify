@@ -21,4 +21,8 @@ export const statusConfig: Record<AssignmentStatus, { label: string; className: 
         label: "Submitted Late",
         className: "border-red-400/40 text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/40",
     },
+    TO_BE_REVIEWED: {
+        label: "To Be Reviewed",
+        className: "border-yellow-400/40 text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950/40"
+    },
 };

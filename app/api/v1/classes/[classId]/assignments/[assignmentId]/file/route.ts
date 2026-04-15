@@ -1,31 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/services/auth/server";
-import { prisma } from "@/lib/prisma";
-import { getStudentSubmission } from "@/services/submissions/server";
-import { getPresignedUrl } from "@/lib/storage";
+import { getSubmissionFileUrl } from "@/services/submissions/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ classId: string; assignmentId: string }> }) {
     const { classId, assignmentId } = await params;
 
     try {
         const session = await getSession();
-        if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        if (!session?.user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        } 
 
         const studentId = session.user.id;
-        // verify enrollment
-        const enrollment = await prisma.enrollment.findUnique({
-            where: { studentId_classId: { studentId, classId } },
-        });
-        if (!enrollment) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-        // verify valid submission
-        const submission = await getStudentSubmission(assignmentId, studentId);
-        if (!submission?.currentFile) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
         // get url
-        const url = await getPresignedUrl(submission.currentFile.fileUrl);
+        const url = await getSubmissionFileUrl(classId, assignmentId, studentId);
         return NextResponse.json({ url });
-    } catch {
-        return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Internal error";
+        const status =
+            message === "Forbidden" ? 403
+            : message === "Not found" ? 404
+            : 500;
+        return NextResponse.json({ error: message }, { status });
     }
 }

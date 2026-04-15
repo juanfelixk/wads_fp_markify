@@ -17,6 +17,7 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [passwordLoading, setPasswordLoading] = useState(false);
 
     const [accounts, setAccounts] = useState<{ providerId: string }[]>([]);
@@ -106,7 +107,7 @@ export default function ProfilePage() {
                             <label className="text-sm font-medium text-foreground select-none">Current Password</label>
                             <div className="relative">
                                 <Input type={showCurrent ? "text" : "password"} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} disabled={passwordLoading} className="h-10 pr-10" placeholder="Enter current password" />
-                                <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <button type="button" onClick={() => setShowCurrent(!showCurrent)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
                                     {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                             </div>
@@ -115,7 +116,7 @@ export default function ProfilePage() {
                             <label className="text-sm font-medium text-foreground select-none">New Password</label>
                             <div className="relative">
                                 <Input type={showNew ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} disabled={passwordLoading} className="h-10 pr-10" placeholder="Enter new password" />
-                                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
                                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                             </div>
@@ -126,9 +127,9 @@ export default function ProfilePage() {
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">Confirm New Password</label>
                             <div className="relative">
-                                <Input type={showNew ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={passwordLoading} className="h-10 pr-10" placeholder="Confirm new password" />
-                                <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                <Input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={passwordLoading} className="h-10 pr-10" placeholder="Confirm new password" />
+                                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                             </div>
                         </div>

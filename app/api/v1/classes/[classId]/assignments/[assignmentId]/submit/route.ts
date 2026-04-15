@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recordSubmissionUpload } from "@/services/submissions/server";
-import { uploadFile } from "@/lib/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME  = "application/pdf";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ classId: string, assignmentId: string }> }) {
-    const { classId } = await params;
-    const { assignmentId } = await params;
+    const { classId, assignmentId } = await params;
 
     try {
         const formData = await req.formData();
@@ -23,17 +21,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ cla
             return NextResponse.json({ error: "File exceeds the 10 MB limit" }, { status: 400 });
         }
 
-        // upload to object storage (lib/storage.ts)
-        const fileUrl = await uploadFile({
-            buffer: Buffer.from(await file.arrayBuffer()),
-            fileName: file.name,
-            mimeType: file.type,
-            folder: `submissions/${classId}/${assignmentId}`,
-        });
-        const result = await recordSubmissionUpload(classId, assignmentId, { fileName: file.name, fileSize: file.size, fileUrl });
+        const result = await recordSubmissionUpload(classId, assignmentId, file);
         return NextResponse.json(result, { status: 201 });
     } catch (err: unknown) {
-        console.error("submit error", err); // add this
         const message = err instanceof Error ? err.message : "Internal error";
         const status =
             message === "Unauthorized" ? 401

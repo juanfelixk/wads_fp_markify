@@ -1,5 +1,5 @@
 import { getSession } from "@/services/auth/server";
-import { prisma } from "@/lib/prisma";
+import { getAssignmentsInClass } from "@/services/assignments/server";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ classId: string }> }) {
     const session = await getSession();
@@ -9,58 +9,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ classId
 
     const { classId } = await params;
 
-    // verify valid student enrollment
-    const enrollment = await prisma.enrollment.findUnique({
-        where: {
-        studentId_classId: {
-            studentId: session.user.id,
-            classId,
-        },
-        },
-    });
-    if (!enrollment) {
-        return Response.json({ error: "Forbidden" }, { status: 403 });
+    try {
+        const data = await getAssignmentsInClass(classId, session.user.id);
+        return Response.json({ data, error: null });
+    } catch (err: unknown) {
+        if (err instanceof Error) {
+            if (err.message === "Forbidden") return Response.json({ error: "Forbidden." }, { status: 403 });
+            if (err.message === "Not found") return Response.json({ error: "Class not found." }, { status: 404 });
+        }
+        return Response.json({ error: "Internal server error." }, { status: 500 });
     }
-
-    const cls = await prisma.class.findUnique({
-        where: { id: classId },
-        include: {
-        course: true,
-        lecturer: { select: { name: true } },
-        assignments: {
-            orderBy: { endDate: "asc" },
-            include: {
-            submissions: {
-                where: { studentId: session.user.id },
-                select: { status: true },
-            },
-            },
-        },
-        },
-    });
-
-    if (!cls) {
-        return Response.json({ error: "Class not found." }, { status: 404 });
-    }
-
-    const data = {
-        classId: cls.id,
-        classCode: cls.code,
-        academicYear: cls.academicYear,
-        courseName: cls.course.name,
-        courseCode: cls.course.code,
-        lecturerName: cls.lecturer.name ?? "Unknown",
-        institution: cls.course.institution,
-        assignments: cls.assignments.map((a) => ({
-        id: a.id,
-        title: a.title,
-        instructions: a.instructions,
-        maxPoints: a.maxPoints,
-        startDate: a.startDate.toISOString(),
-        endDate: a.endDate.toISOString(),
-        status: a.submissions[0]?.status ?? "NOT_SUBMITTED",
-        })),
-    };
-
-    return Response.json({ data, error: null });
 }

@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/services/auth/server";
 import type { FeedbackPageData } from "./types";
 import { RubricCriterion } from "../assignments/types";
- 
+
 export async function getFeedbackPageData(classId: string, assignmentId: string): Promise<FeedbackPageData> {
     const session = await getSession();
     if (!session?.user) throw new Error("Unauthorized");

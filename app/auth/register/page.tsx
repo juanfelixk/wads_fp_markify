@@ -18,6 +18,7 @@ export default function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const [courseCode, setCourseCode] = useState("");
     const [classCode, setClassCode] = useState("");
     const [academicYear, setAcademicYear] = useState("");
@@ -42,10 +43,8 @@ export default function RegisterPage() {
         return null;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         const error = validate();
-
         if (error) {
             toast.error(error);
             return;
@@ -60,7 +59,7 @@ export default function RegisterPage() {
                 password,
                 image,
                 callbackURL: "/dashboard",
-                // @ts-expect-error: extra fields passed through to databaseHooks
+                // @ts-expect-error: extra fields passed for enrollment (not expected by BetterAuth)
                 courseCode: courseCode.trim(),
                 classCode: classCode.trim(),
                 academicYear: academicYear.trim(),
@@ -104,7 +103,7 @@ export default function RegisterPage() {
                 <div className="space-y-5">
                     <div className="flex flex-col gap-1">
                         <label htmlFor="name" className="text-sm font-medium text-foreground select-none">Full Name</label>
-                        <Input type="name" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} disabled={loading} className="h-10" />
+                        <Input type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} disabled={loading} className="h-10" />
                     </div>
                     <div className="flex flex-col gap-1">
                         <label htmlFor="email" className="text-sm font-medium text-foreground select-none">Email</label>
@@ -117,7 +116,7 @@ export default function RegisterPage() {
                         </div>
                         <div className="relative">
                             <Input type={showPassword ? "text" : "password"} placeholder="Enter password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} className="h-10 pr-10" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
                                 {showPassword ? (
                                     <EyeOff className="h-4 w-4" />
                                 ) : (
@@ -134,9 +133,9 @@ export default function RegisterPage() {
                             <label htmlFor="password" className="text-sm font-medium text-foreground select-none">Confirm Password</label>
                         </div>
                         <div className="relative">
-                            <Input type={showPassword ? "text" : "password"} placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={loading} className="h-10 pr-10" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                {showPassword ? (
+                            <Input type={showConfirm ? "text" : "password"} placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={loading} className="h-10 pr-10" />
+                            <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                                {showConfirm ? (
                                     <EyeOff className="h-4 w-4" />
                                 ) : (
                                     <Eye className="h-4 w-4" />

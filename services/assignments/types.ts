@@ -5,7 +5,8 @@ export type AssignmentStatus =
     | "SUBMITTED"
     | "REVISED"
     | "GRADED"
-    | "SUBMITTED_LATE";
+    | "SUBMITTED_LATE"
+    | "TO_BE_REVIEWED";
 
 export interface Assignment {
     id: string;

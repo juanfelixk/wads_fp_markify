@@ -1,5 +1,5 @@
 import { CalendarAssignment } from "./types";
-import { ClassDetail } from "../classes/types";
+import { ClassDetail } from "@/services/classes/types";
 import type { AssignmentPageData } from "./types";
  
 export async function fetchClassDetail(classId: string): Promise<ClassDetail> {

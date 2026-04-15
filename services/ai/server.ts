@@ -4,147 +4,129 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/services/auth/server";
 import { RubricCriterion } from "@/services/assignments/types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import type { GrammarFeedback, StructureFeedback } from "../feedback/types";
 import { Prisma } from "@/generated/prisma";
 import { getPresignedUrl } from "@/lib/storage";
+import { GradingResult } from "./types";
+import Groq from "groq-sdk";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const MODEL = "gemini-3.1-flash-lite-preview";
+const GOOGLE_MODEL = "gemini-3.1-flash-lite-preview";
 const MAX_RETRIES = 3;
 
-// ---------------------------------------------------------------------------
-// Internal types (not exposed to client)
-// ---------------------------------------------------------------------------
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+const GROQ_MODEL = "llama-3.1-8b-instant";
 
-interface RubricBreakdownItem {
-  criterionName: string;
-  pointsAwarded: number;
-  pointsMax: number;
-  rationale: string;
-}
-
-interface GradingAnnotation {
-  page: number;
-  x: number;
-  y: number;
-  width: number | null;
-  height: number | null;
-  type: "PRAISE" | "ISSUE" | "SUGGESTION";
-  content: string;
-  quote: string | null;
-}
-
-interface GradingResult {
-  aiScore: number;
-  rubricBreakdown: RubricBreakdownItem[];
-  aiGrammarFeedback: GrammarFeedback;
-  aiStructureFeedback: StructureFeedback;
-  annotations: GradingAnnotation[];
-}
-
-// ---------------------------------------------------------------------------
-// Prompt builder
-// ---------------------------------------------------------------------------
-
-function buildPrompt(
-  rubric: RubricCriterion[],
-  maxPoints: number,
-  assignmentTitle: string
-): string {
+// prompt
+function buildPrompt(rubric: RubricCriterion[], maxPoints: number, assignmentTitle: string): string {
   const rubricText = rubric.length
-    // FIX 1: was c.points — correct field is c.maxPoints per RubricCriterion type
     ? rubric.map((c) => `- ${c.name} (${c.maxPoints} pts): ${c.description}`).join("\n")
     : `- Overall quality (${maxPoints} pts): General quality, argument, and writing.`;
 
-  return `You are an academic grading assistant. Analyse the attached PDF submission and return ONLY a single valid JSON object — no markdown fences, no explanation, no preamble.
+  return `
+    You are an academic grading assistant. Analyse the attached PDF submission and return ONLY a single valid JSON object, no markdown fences, no explanation, no preamble.
+    Assignment: "${assignmentTitle}"
+    Total max points: ${maxPoints}
+    Rubric criteria: ${rubricText}
 
-Assignment: "${assignmentTitle}"
-Total max points: ${maxPoints}
-
-Rubric criteria:
-${rubricText}
-
-Return exactly this JSON shape:
-{
-  "aiScore": <integer — total points awarded, capped at ${maxPoints}>,
-  "rubricBreakdown": [
+    Return exactly this JSON shape:
     {
-      "criterionName": "<exact criterion name from rubric>",
-      "pointsAwarded": <integer>,
-      "pointsMax": <integer>,
-      "rationale": "<1-2 sentences explaining the score>"
+      "aiScore": <integer - total points awarded, capped at ${maxPoints}>,
+      "rubricBreakdown": [
+        {
+          "criterionName": "<exact criterion name from rubric>",
+          "pointsAwarded": <integer>,
+          "pointsMax": <integer>,
+          "rationale": "<1-2 sentences explaining the score>"
+        }
+      ],
+      "aiGrammarFeedback": {
+        "summary": "<1-2 sentence overview of grammar quality>",
+        "issues": [
+          {
+            "type": "<e.g. Subject-Verb Agreement | Comma Splice | Spelling | Word Choice>",
+            "severity": "<LOW|MEDIUM|HIGH>",
+            "original": "<quoted text from submission, max 20 words>",
+            "suggestion": "<corrected version>",
+            "explanation": "<brief explanation>"
+          }
+        ]
+      },
+      "aiStructureFeedback": {
+        "overview": "<1-2 sentence overview of document structure>",
+        "sections": [
+          {
+            "name": "<section name e.g. Introduction | Argument | Evidence | Conclusion>",
+            "score": <integer 0-10>,
+            "maxScore": 10,
+            "feedback": "<specific actionable feedback>"
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "page": <1-based integer>,
+          "x": <float 0.05-0.85>,
+          "y": <float 0.05-0.85>,
+          "width": <float 0.1-0.5 or null>,
+          "height": <float 0.03-0.15 or null>,
+          "type": "<PRAISE|ISSUE|SUGGESTION>",
+          "content": "<your comment, 1-3 sentences>",
+          "quote": "<exact short text this refers to, max 25 words, or null>"
+        }
+      ]
     }
-  ],
-  "aiGrammarFeedback": {
-    "summary": "<1-2 sentence overview of grammar quality>",
-    "issues": [
-      {
-        "type": "<e.g. subject-verb agreement | comma splice | spelling | word choice>",
-        "severity": "<low|medium|high>",
-        "original": "<quoted text from submission, max 20 words>",
-        "suggestion": "<corrected version>",
-        "explanation": "<brief explanation>"
-      }
-    ]
-  },
-  "aiStructureFeedback": {
-    "overview": "<1-2 sentence overview of document structure>",
-    "sections": [
-      {
-        "name": "<section name e.g. Introduction | Argument | Evidence | Conclusion>",
-        "score": <integer 0-10>,
-        "maxScore": 10,
-        "feedback": "<specific actionable feedback>"
-      }
-    ]
-  },
-  "annotations": [
-    {
-      "page": <1-based integer>,
-      "x": <float 0.05-0.85>,
-      "y": <float 0.05-0.85>,
-      "width": <float 0.1-0.5 or null>,
-      "height": <float 0.03-0.15 or null>,
-      "type": "<PRAISE|ISSUE|SUGGESTION>",
-      "content": "<your comment, 1-3 sentences>",
-      "quote": "<exact short text this refers to, max 25 words, or null>"
-    }
-  ]
+
+    Rules:
+    - Provide 5-10 annotations spread across different pages.
+    - Score strictly per rubric. Award 0 for any criterion not addressed.
+    - aiScore must equal the sum of all pointsAwarded values.
+    - List up to 8 grammar issues, most impactful only.
+    - Structure sections should reflect sections actually present in the document.
+  `;
 }
 
-Rules:
-- Provide 5-10 annotations spread across different pages.
-- Score strictly per rubric. Award 0 for any criterion not addressed.
-- aiScore must equal the sum of all pointsAwarded values.
-- List up to 8 grammar issues — most impactful only.
-- Structure sections should reflect sections actually present in the document.`;
-}
-
-// ---------------------------------------------------------------------------
-// Fetch PDF as base64
-// ---------------------------------------------------------------------------
-
-async function fetchPdfBase64(key: string): Promise<string> {
-  // key is the raw B2 storage key — generate a presigned URL first
-  const presignedUrl = await getPresignedUrl(key); // 5 min is enough
+// fetch pdf (for models supporting pdf file input)
+async function fetchPdfBuffer(key: string): Promise<Buffer> {
+  const presignedUrl = await getPresignedUrl(key);
   const res = await fetch(presignedUrl);
   if (!res.ok) throw new Error(`Failed to fetch PDF: ${res.status}`);
   const buffer = await res.arrayBuffer();
-  return Buffer.from(buffer).toString("base64");
+  return Buffer.from(buffer);
 }
 
-// ---------------------------------------------------------------------------
-// Call Gemini with exponential backoff retry
-// ---------------------------------------------------------------------------
 
-async function callGemini(
-  pdfBase64: string,
-  prompt: string,
-  attempt = 1
-): Promise<GradingResult> {
+// extract text from pdf (for models not supporting pdf file input)
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  const pdfjsLib = await import("pdfjs-dist/build/pdf");
+  const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(buffer),
+    // Disable worker in Node.js server context
+    useWorkerFetch: false,
+    isEvalSupported: false,
+    useSystemFonts: true
+  });
+
+  const pdf = await loadingTask.promise;
+  let text = "";
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+
+    const pageText = content.items
+      .map((item: any) => item.str)
+      .join(" ");
+
+    text += pageText + "\n";
+  }
+
+  return text.slice(0, 15000);
+}
+
+// call gemini with limited retry
+async function callGemini(pdfBase64: string, prompt: string, attempt = 1): Promise<GradingResult> {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL });
-
+    const model = genAI.getGenerativeModel({ model: GOOGLE_MODEL });
     const result = await model.generateContent({
       contents: [
         {
@@ -178,15 +160,47 @@ async function callGemini(
   }
 }
 
-// ---------------------------------------------------------------------------
-// gradeSubmission — called from recordSubmissionUpload after file is saved
-// ---------------------------------------------------------------------------
+// call llama
+async function callLlama(text: string, prompt: string): Promise<GradingResult> {
+  const completion = await groq.chat.completions.create({
+    model: GROQ_MODEL,
+    messages: [
+      {
+        role: "system",
+        content: "You are a strict grading assistant. Return ONLY valid JSON.",
+      },
+      {
+        role: "user",
+        content: `${prompt}\n\n--- STUDENT SUBMISSION ---\n${text}`,
+      },
+    ],
+    temperature: 0.2,
+  });
+  const raw = completion.choices[0]?.message?.content ?? "";
+  const clean = raw
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+  return JSON.parse(clean) as GradingResult;
+}
 
-export async function gradeSubmission(
-  assignmentId: string,
-  studentId: string,
-  pdfUrl: string
-): Promise<{ success: true } | { success: false; error: string }> {
+async function callAI(pdfBuffer: Buffer, prompt: string): Promise<GradingResult> {
+  try {
+    const base64 = pdfBuffer.toString("base64");
+    return await callGemini(base64, prompt);
+  } catch (err: any) {
+    if (err?.status === 503 || err?.status === 429) {
+      console.warn("Gemini failed -> fallback to Llama");
+      const text = await extractPdfText(pdfBuffer);
+      return await callLlama(text, prompt);
+    }
+    throw err;
+  }
+}
+
+// grade
+export async function gradeSubmission(assignmentId: string, studentId: string, pdfUrl: string): Promise<{ success: true } | { success: false; error: string }> {
   try {
     const assignment = await prisma.assignment.findUnique({
       where: { id: assignmentId },
@@ -196,11 +210,9 @@ export async function gradeSubmission(
 
     const rubric = (assignment.rubric as RubricCriterion[] | null) ?? [];
     const maxPoints = assignment.maxPoints ?? 100;
-
-    const pdfBase64 = await fetchPdfBase64(pdfUrl);
+    const pdfBuffer = await fetchPdfBuffer(pdfUrl);
     const prompt = buildPrompt(rubric, maxPoints, assignment.title);
-    const result = await callGemini(pdfBase64, prompt);
-
+    const result = await callAI(pdfBuffer, prompt);
     const aiScore = Math.max(0, Math.min(maxPoints, Math.round(result.aiScore)));
 
     await prisma.$transaction(async (tx) => {
@@ -212,19 +224,17 @@ export async function gradeSubmission(
 
       const submissionId = submission.id;
 
-      // FIX 2 & 3: Prisma's Json field requires plain object — cast through
-      // unknown to satisfy the index signature Prisma expects on InputJsonValue
       await tx.submission.update({
         where: { id: submissionId },
         data: {
           aiScore,
           aiGrammarFeedback: result.aiGrammarFeedback as unknown as Prisma.InputJsonValue,
           aiStructureFeedback: result.aiStructureFeedback as unknown as Prisma.InputJsonValue,
-          status: "GRADED",
+          status: "TO_BE_REVIEWED", // UPDATE
         },
       });
 
-      // Upsert per-criterion scores
+      // upsert per criterion scores
       for (const c of result.rubricBreakdown) {
         await tx.submissionCriterionScore.upsert({
           where: {
@@ -245,11 +255,10 @@ export async function gradeSubmission(
         });
       }
 
-      // Replace AI annotations
+      // replace AI annotations
       await tx.submissionAnnotation.deleteMany({
         where: { submissionId, source: "AI" },
       });
-
       if (result.annotations?.length) {
         await tx.submissionAnnotation.createMany({
           data: result.annotations.map((ann) => ({
@@ -267,7 +276,6 @@ export async function gradeSubmission(
         });
       }
     });
-
     return { success: true };
   } catch (err) {
     console.error("[gradeSubmission] error:", err);
@@ -278,14 +286,8 @@ export async function gradeSubmission(
   }
 }
 
-// ---------------------------------------------------------------------------
-// reGradeSubmission — instructor-only, verifies they own the class
-// ---------------------------------------------------------------------------
-
-export async function reGradeSubmission(
-  assignmentId: string,
-  studentId: string
-): Promise<{ success: true } | { success: false; error: string }> {
+// CHANGE TO MANUAL GRADING FOR LECTURER
+export async function reGradeSubmission(assignmentId: string, studentId: string): Promise<{ success: true } | { success: false; error: string }> {
   const session = await getSession();
   if (!session?.user) return { success: false, error: "Unauthorized" };
 

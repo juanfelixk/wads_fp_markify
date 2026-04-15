@@ -13,7 +13,7 @@ interface StructureCardProps {
 
 export default function StructureCard({ structure }: StructureCardProps) {
     const [open, setOpen] = useState(true);
-    if (!structure) {
+    if (!structure || !structure.sections?.length) {
         return (
         <Card className="border-dashed">
             <CardContent className="px-5 space-y-4">
@@ -45,8 +45,8 @@ export default function StructureCard({ structure }: StructureCardProps) {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     <CardContent className="space-y-4 pt-0">
-                        {structure.overview && <p className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-2.5 italic">{structure.overview}</p>}
-                        {structure.sections.map((section, i) => (
+                        {structure?.overview && <p className="text-xs text-muted-foreground border-l-2 border-primary/30 pl-2.5 italic">{structure.overview}</p>}
+                        {structure?.sections?.map((section, i) => (
                         <div key={i} className="space-y-1.5">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium">{section.name}</span>
