@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronRight, Award, MessageSquare, Sparkles, AlertCircle, Clock, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronRight, Award, MessageSquare, Sparkles, AlertCircle, Clock, FileText, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,15 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSubmissionFileUrl } from "@/services/submissions/client";
-import { getFeedbackPageData } from "@/services/feedback/server";
+import { fetchFeedbackPageData } from "@/services/feedback/client";
 import type { FeedbackPageData } from "@/services/feedback/types";
 import { statusConfig } from "@/services/assignments/constants";
 import { annotationStyle } from "@/services/feedback/constants";
 import { GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
 import RubricDialog from "@/components/feedback/rubric-dialog";
-import AnnotationSidebar from "@/components/feedback/annotation-sidebar";
+import AnnotationSidebar from "@/components/feedback/annotation-card";
 import GrammarCard from "@/components/feedback/grammar-card";
 import StructureCard from "@/components/feedback/structure-card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ssr:false prevents DOMMatrix / canvas errors on the server
 const PdfViewerInner = dynamic(() => import("@/components/feedback/pdf-viewer-inner"), {
@@ -33,7 +34,35 @@ const PdfViewerInner = dynamic(() => import("@/components/feedback/pdf-viewer-in
     )}
 );
 
-function ScoresCard({ data }: { data: FeedbackPageData }) {
+function IrrelevantBanner({ assignmentId, classId }: { assignmentId: string; classId: string }) {
+    return (
+        <Card className="border-destructive/50 bg-destructive/5">
+            <CardContent className="px-5 space-y-4">
+                <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                    <div className="space-y-1.5">
+                        <h3 className="text-base font-semibold text-destructive">
+                            Irrelevant Submission Detected
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            Your submission does not appear to match the instructions for this assignment. No score has been calculated. Please upload the correct document to receive AI-generated feedback and grading.
+                        </p>
+                        <p className="text-sm text-muted-foreground leading-relaxed mt-1">
+                            If you think that this is an error, please contact your lecturer.
+                        </p>
+                    </div>
+                </div>
+                <Button variant="destructive" size="sm" className="w-full" asChild>
+                    <Link href={`/dashboard/student/class/${classId}/assignment/${assignmentId}`}>
+                        Submit the correct document
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
+    );
+}
+
+function ScoresCard({ data, aiTimedOut }: { data: FeedbackPageData, aiTimedOut?: boolean }) {
     const aiPct = data.maxPoints ? ((data.aiScore ?? 0) / data.maxPoints) * 100 : 0;
     const finalPct = data.maxPoints && data.finalScore != null ? (data.finalScore / data.maxPoints) * 100 : null;
     const [rubricOpen, setRubricOpen] = useState(false);
@@ -46,15 +75,27 @@ function ScoresCard({ data }: { data: FeedbackPageData }) {
                 <div>
                     <div className="flex items-center justify-between mb-1.5">
                         <span className="text-sm font-medium text-muted-foreground tracking-wide flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3" /> AI Score
+                            <Sparkles className="w-3 h-3" /> AI Score
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Info className="w-3 h-3 text-muted-foreground" />
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="max-w-xs text-xs">
+                                        This AI-generated score is an estimate based on the rubric and may be inaccurate. It does not represent your final grade. Use this for revision purposes only.
+                                    </TooltipContent>
+                                </Tooltip>
+                                </TooltipProvider>
                         </span>
                         {data.aiScore != null
                         ? <span className="text-sm font-semibold tabular-nums">{data.aiScore}<span className="text-muted-foreground font-normal"> / {data.maxPoints ?? "—"}</span></span>
-                        : <span className="text-xs text-muted-foreground italic">Analysing…</span>
+                        : aiTimedOut
+                            ? <span className="text-xs text-amber-500 italic flex items-center gap-1"><AlertCircle className="w-3 h-3" /> AI currently unavailable, please try again later.</span>
+                            : <span className="text-xs text-muted-foreground italic">Analysing…</span>
                         }
                     </div>
                     {data.aiScore != null ? <Progress value={aiPct} className="h-1.5" /> : <Skeleton className="h-1.5 w-full rounded-full" />}
-                    <p className="text-xs text-muted-foreground mt-1.5">Generated by AI, aligned with the grading rubric.</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">AI-generated estimate. Final grading is determined by your instructor.</p>
                 </div>
                 <Separator />
                 <div>
@@ -76,7 +117,7 @@ function ScoresCard({ data }: { data: FeedbackPageData }) {
                     </>
                 )}
             </CardContent>
-            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.assignmentTitle} rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.criterionScores} />
+            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.assignmentTitle} rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.criterionScores} status={data.status} role={data.role} />
         </Card>
         
     );
@@ -107,6 +148,10 @@ function InstructorCommentCard({ comment }: { comment: string | null }) {
   );
 }
 
+// timeout when all models fail
+const POLL_INTERVAL_MS = 5000; // check every 5s
+const POLL_TIMEOUT_MS  = 120_000; // give up after 2 minutes
+
 export default function FeedbackStudioPage() {
     const { classId, assignmentId } = useParams<{ classId: string; assignmentId: string }>();
     const [data, setData] = useState<FeedbackPageData | null>(null);
@@ -115,23 +160,65 @@ export default function FeedbackStudioPage() {
     const [loading, setLoading] = useState(true);
     const [activeAnnotation, setActiveAnnotation] = useState<string | null>(null);
     const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+    const pollTimer  = useRef<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [aiTimedOut, setAiTimedOut] = useState(false);
+
+    function clearTimers() {
+        if (pollTimer.current) clearInterval(pollTimer.current);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    }
 
     useEffect(() => {
-        async function load() {
-        try {
-            const [pageData, url] = await Promise.all([
-            getFeedbackPageData(classId, assignmentId),
-            fetchSubmissionFileUrl(classId, assignmentId),
-            ]);
-            setData(pageData);
-            setFileUrl(url);
-        } catch (e) {
-            setError(e instanceof Error ? e.message : "Failed to load feedback.");
-        } finally {
-            setLoading(false);
+        async function initialLoad() {
+            try {
+                const [pageData, url] = await Promise.all([
+                    fetchFeedbackPageData(classId, assignmentId),
+                    fetchSubmissionFileUrl(classId, assignmentId),
+                ]);
+                setData(pageData);
+                setFileUrl(url);
+                setLoading(false);
+
+                // if AI result already answers, no need to poll
+                if (pageData.aiScore !== null || pageData.isIrrelevant) {
+                    return;
+                }
+
+                // compute how much time remaining before timeout
+                const submittedAt = pageData.submittedAt ? new Date(pageData.submittedAt).getTime() : Date.now();
+                const elapsed     = Date.now() - submittedAt;
+                const remaining   = POLL_TIMEOUT_MS - elapsed;
+
+                if (remaining <= 0) {
+                    setAiTimedOut(true);
+                    return;
+                }
+
+                // set timeout for only the remaining window
+                timeoutRef.current = setTimeout(() => {
+                    clearTimers();
+                    setAiTimedOut(true);
+                }, remaining);
+
+                pollTimer.current = setInterval(async () => {
+                    try {
+                        const polled = await fetchFeedbackPageData(classId, assignmentId);
+                        setData(polled);
+                        if (polled.aiScore !== null || polled.isIrrelevant) {
+                            clearTimers();
+                        }
+                    } catch {
+                        // silently ignore
+                    }
+                }, POLL_INTERVAL_MS);
+                } catch (e) {
+                setError(e instanceof Error ? e.message : "Failed to load feedback.");
+                setLoading(false);
+            }
         }
-        }
-        load();
+        initialLoad();
+        return () => clearTimers();
     }, [classId, assignmentId]);
 
     useEffect(() => {
@@ -250,11 +337,17 @@ export default function FeedbackStudioPage() {
                         </>
                         ) : data ? (
                         <>
-                            <ScoresCard data={data} />
-                            <InstructorCommentCard comment={data.comment} />
-                            <AnnotationSidebar annotations={data.annotations} activeId={activeAnnotation} onSelect={setActiveAnnotation} />
-                            <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} />
-                            <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} />
+                            {data.isIrrelevant ? (
+                                <IrrelevantBanner assignmentId={assignmentId} classId={classId} />
+                            ) : (
+                                <>
+                                    <ScoresCard data={data} aiTimedOut={aiTimedOut} />
+                                    <InstructorCommentCard comment={data.comment} />
+                                    <AnnotationSidebar annotations={data.aiScore != null ? data.annotations : []} activeId={activeAnnotation} onSelect={setActiveAnnotation} aiTimedOut={aiTimedOut} />
+                                    <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} aiTimedOut={aiTimedOut} />
+                                    <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} aiTimedOut={aiTimedOut} />
+                                </>
+                            )}
                         </>
                         ) : null}
                     </motion.div>

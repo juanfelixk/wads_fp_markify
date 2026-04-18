@@ -162,6 +162,7 @@ model Submission {
   comment      String?
   aiGrammarFeedback    Json?   // stores grammar & style analysis results
   aiStructureFeedback  Json?   // stores essay structure evaluation results
+  isIrrelevant Boolean @default(false)
 
   assignmentId String
   assignment   Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)

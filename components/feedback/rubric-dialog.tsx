@@ -12,10 +12,14 @@ interface RubricDialogProps {
     rubric: RubricCriterion[];
     totalPoints: number | null;
     scores?: SubmissionCriterionScore[] | null;
+    status?: string | null;
+    role: string;
 }
 
-export default function RubricDialog({ open, onOpenChange, title, rubric, totalPoints, scores }: RubricDialogProps) {
+export default function RubricDialog({ open, onOpenChange, title, rubric, totalPoints, scores, status, role }: RubricDialogProps) {
     if (!rubric || rubric.length === 0) return null;
+
+    const visible = (role === "LECTURER") || (status === "GRADED");
 
     function getScore(name: string) {
         return scores?.find((s) => s.criterionName === name);
@@ -29,7 +33,7 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                     <DialogDescription>{title}</DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-3 mt-2">
+                <div className="space-y-3">
                     <div className="space-y-3 mt-2">
                         {rubric.map((criterion, idx) => {
                             const score = getScore(criterion.name);
@@ -38,7 +42,7 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                                 <div key={idx} className="grid grid-cols-[1fr_auto] gap-3 items-stretch">
                                     {/* LEFT: rubric content */}
                                     <div className="p-4 rounded-lg border bg-muted/30">
-                                        <div className="flex items-center justify-between mb-1.5">
+                                        <div className="flex items-center justify-between mb-0.5">
                                             <p className="sm:text-sm text-base font-semibold text-foreground">
                                             {criterion.name}
                                             </p>
@@ -54,7 +58,7 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
 
                                     {/* RIGHT: score box */}
                                         <div className="flex items-center justify-center min-w-[70px] px-3 rounded-lg border bg-background">
-                                        {score ? (
+                                        {score && visible ? (
                                             <span className="text-base font-bold text-primary tabular-nums">
                                             {score.pointsAwarded}
                                             </span>
@@ -67,7 +71,7 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                         })}
                     </div>
 
-                    {totalPoints != null && (
+                    {totalPoints != null && visible ? (
                         <div className="flex justify-between items-center pt-2 border-t">
                             <span className="sm:text-sm text-base font-semibold text-foreground">
                             Total
@@ -76,6 +80,10 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                             {(scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? "-")} / {totalPoints}
                             </span>
                         </div>
+                        ) : (
+                            <div className="text-xs text-muted-foreground text-right italic">
+                                Pending lecturer review...
+                            </div>
                         )}
                 </div>
             </DialogContent>

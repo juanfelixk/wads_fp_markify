@@ -78,6 +78,8 @@ export async function getAssignmentPageData(classId: string, assignmentId: strin
         lecturerName: assignment.class.lecturer.name,
 
         submission,
+
+        role: session.user.role as "STUDENT" | "LECTURER",
     };
 }
 

@@ -1,16 +1,31 @@
 "use client";
 
 import { Annotation } from "@/services/feedback/types";
-import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { annotationStyle } from "@/services/feedback/constants";
-import { PencilLine } from "lucide-react";
+import { AlertCircle, Loader2, PencilLine } from "lucide-react";
 
-export default function AnnotationSidebar({ annotations, activeId, onSelect }: {
-    annotations: Annotation[];
-    activeId: string | null;
-    onSelect: (id: string | null) => void;
-    }) {
-    if (annotations.length === 0) return null;
+export default function AnnotationSidebar({ annotations, activeId, onSelect, aiTimedOut }: { annotations: Annotation[]; activeId: string | null; onSelect: (id: string | null) => void; aiTimedOut?: boolean }) {
+    if (!annotations || annotations.length === 0) {
+        return (
+            <Card className="border-dashed">
+                <CardContent className="px-5 space-y-4">
+                    <h3 className="text-base font-semibold flex items-center gap-2">
+                        <PencilLine className="w-4 h-4 text-primary" /> Inline Annotations
+                    </h3>
+                    {aiTimedOut? (
+                        <p className="text-sm italic flex items-center gap-2 text-amber-500">
+                            <AlertCircle className="w-3.5 h-3.5" /> AI currently unavailable, please try again later.
+                        </p>
+                    ) : (
+                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysis in progress…
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+        );
+    };
     const counts = {
         PRAISE: annotations.filter((a) => a.type === "PRAISE").length,
         ISSUE: annotations.filter((a) => a.type === "ISSUE").length,

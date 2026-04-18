@@ -6,6 +6,7 @@ export interface GradingResult {
   aiGrammarFeedback: GrammarFeedback;
   aiStructureFeedback: StructureFeedback;
   annotations: GradingAnnotation[];
+  isIrrelevant: boolean;
 }
 
 interface RubricBreakdownItem {

@@ -33,7 +33,7 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
         },
     });
     
-    if (!submission) throw new Error("Submission not found");
+    if (!submission) throw new Error("Not found");
     
     const { assignment } = submission;
     const { class: cls } = assignment;
@@ -43,7 +43,10 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
         courseName: cls.course.name,
         classCode: cls.code,
         assignmentTitle: assignment.title,
+        role: session.user.role as "STUDENT" | "LECTURER",
+        submittedAt: submission.submittedAt?.toISOString() ?? null,
     
+        isIrrelevant: submission.isIrrelevant,
         status: submission.status,
         fileName: submission.fileName,
         aiScore: submission.aiScore,

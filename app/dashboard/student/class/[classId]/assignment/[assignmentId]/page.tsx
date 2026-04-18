@@ -468,7 +468,7 @@ export default function AssignmentPage() {
                 </div>
             </div>
 
-            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.title}rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.submission?.criterionScores ?? null} />
+            <RubricDialog open={rubricOpen} onOpenChange={setRubricOpen} title={data.title}rubric={data.rubric ?? []} totalPoints={data.maxPoints} scores={data.submission?.criterionScores ?? null} status={data.submission?.status} role={data.role} />
         </div>
     );
 }

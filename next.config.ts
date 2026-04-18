@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       canvas: false,
     };
-    // allow Next.js to bundle the pdf.js worker
+    // allow next.js to bundle the pdf.js worker
     config.module.rules.push({
       test: /pdf\.worker\.(min\.)?mjs/,
       type: "asset/resource",

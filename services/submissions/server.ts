@@ -119,9 +119,18 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
                 fileSize: file.size,
                 submittedAt: new Date(),
                 aiScore: null,
+                isIrrelevant: false,
                 aiGrammarFeedback: Prisma.JsonNull,
                 aiStructureFeedback: Prisma.JsonNull,
             },
+        });
+
+        // clear existing so UI displays loading
+        await tx.submissionAnnotation.deleteMany({
+            where: { submissionId: sub.id, source: "AI" },
+        });
+        await tx.submissionCriterionScore.deleteMany({
+            where: { submissionId: sub.id },
         });
 
         const ver = await tx.submissionVersion.create({

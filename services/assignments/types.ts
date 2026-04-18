@@ -58,4 +58,6 @@ export interface AssignmentPageData {
     lecturerName: string | null;
  
     submission: SubmissionData | null;
+
+    role: "STUDENT" | "LECTURER";
 }
