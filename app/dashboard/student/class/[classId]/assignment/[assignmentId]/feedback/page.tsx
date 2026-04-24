@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ChevronRight, Award, MessageSquare, Sparkles, AlertCircle, Clock, FileText, Loader2, Info } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowLeft, ChevronRight, Award, MessageSquare, Sparkles, AlertCircle, Clock, FileText, Loader2, Info, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,7 +16,6 @@ import { fetchSubmissionFileUrl } from "@/services/submissions/client";
 import { fetchFeedbackPageData } from "@/services/feedback/client";
 import type { FeedbackPageData } from "@/services/feedback/types";
 import { statusConfig } from "@/services/assignments/constants";
-import { annotationStyle } from "@/services/feedback/constants";
 import { GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
 import RubricDialog from "@/components/feedback/rubric-dialog";
 import AnnotationSidebar from "@/components/feedback/annotation-card";
@@ -28,9 +27,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const PdfViewerInner = dynamic(() => import("@/components/feedback/pdf-viewer-inner"), {
     ssr: false,
     loading: () => (
-    <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-    </div>
+        <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
     )}
 );
 
@@ -57,6 +56,24 @@ function IrrelevantBanner({ assignmentId, classId }: { assignmentId: string; cla
                         Submit the correct document
                     </Link>
                 </Button>
+            </CardContent>
+        </Card>
+    );
+}
+
+function PastVersionBanner() {
+    return (
+        <Card>
+            <CardContent className="px-5 space-y-4">
+                <div className="flex items-start gap-3">
+                    <History className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="space-y-1.5">
+                        <h3 className="text-base font-semibold">Past Version</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                            You're viewing an older version of your submission. Feedback is only available for your latest submission.
+                        </p>
+                    </div>
+                </div>
             </CardContent>
         </Card>
     );
@@ -148,12 +165,11 @@ function InstructorCommentCard({ comment }: { comment: string | null }) {
   );
 }
 
-// timeout when all models fail
-const POLL_INTERVAL_MS = 5000; // check every 5s
-const POLL_TIMEOUT_MS  = 120_000; // give up after 2 minutes
-
 export default function FeedbackStudioPage() {
     const { classId, assignmentId } = useParams<{ classId: string; assignmentId: string }>();
+    const searchParams = useSearchParams();
+    const versionId = searchParams.get("versionId") ?? undefined;
+    const isPastVersion = !!versionId;
     const [data, setData] = useState<FeedbackPageData | null>(null);
     const [fileUrl, setFileUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -163,6 +179,11 @@ export default function FeedbackStudioPage() {
     const pollTimer  = useRef<NodeJS.Timeout | null>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [aiTimedOut, setAiTimedOut] = useState(false);
+    const status = data ? statusConfig[data.status] : null;
+
+    // timeout when all models fail
+    const POLL_INTERVAL_MS = 5000; // check every 5s
+    const POLL_TIMEOUT_MS  = 240_000; // give up after 4 minutes
 
     function clearTimers() {
         if (pollTimer.current) clearInterval(pollTimer.current);
@@ -173,14 +194,14 @@ export default function FeedbackStudioPage() {
         async function initialLoad() {
             try {
                 const [pageData, url] = await Promise.all([
-                    fetchFeedbackPageData(classId, assignmentId),
-                    fetchSubmissionFileUrl(classId, assignmentId),
+                    fetchFeedbackPageData(classId, assignmentId, versionId),
+                    fetchSubmissionFileUrl(classId, assignmentId, versionId),
                 ]);
                 setData(pageData);
                 setFileUrl(url);
                 setLoading(false);
 
-                // if AI result already answers, no need to poll
+                // if AI already answers, no need to poll
                 if (pageData.aiScore !== null || pageData.isIrrelevant) {
                     return;
                 }
@@ -245,8 +266,6 @@ export default function FeedbackStudioPage() {
         );
     }
 
-    const status = data ? statusConfig[data.status] : null;
-
     return (
         <div className="min-h-screen bg-background">
             {/* top bar */}
@@ -296,33 +315,11 @@ export default function FeedbackStudioPage() {
                                 </div>
                             )}
 
-                            {/* PdfViewerInner is loaded only in the browser */}
-                            {!loading && fileUrl && (
-                                <PdfViewerInner fileUrl={fileUrl} annotations={data?.annotations ?? []} activeAnnotation={activeAnnotation} onAnnotationClick={setActiveAnnotation} onPageRefsReady={(refs) => { pageRefs.current = refs; }} />
-                            )}
-
-                            {/* annotation callout */}
-                            <AnimatePresence>
-                                {activeAnnotation && data && (() => {
-                                    const ann = data.annotations.find((a) => a.id === activeAnnotation);
-                                    if (!ann) return null;
-                                    const s = annotationStyle[ann.type];
-                                    const Icon = s.icon;
-                                    return (
-                                        <motion.div key={activeAnnotation} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 4 }} className={`m-3 p-3 rounded-lg border ${s.bg} ${s.border}`}>
-                                            <div className="flex items-start gap-2">
-                                                <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${s.text}`} />
-                                                <div>
-                                                    <p className={`text-xs font-semibold mb-0.5 ${s.text}`}>{s.label}</p>
-                                                    {ann.quote && <p className="text-[11px] text-muted-foreground italic mb-1">"{ann.quote}"</p>}
-                                                    <p className="text-sm text-foreground/80">{ann.content}</p>
-                                                </div>
-                                                <button onClick={() => setActiveAnnotation(null)} className="ml-auto text-muted-foreground hover:text-foreground text-xs shrink-0">✕</button>
-                                            </div>
-                                        </motion.div>
-                                    );
-                                })()}
-                            </AnimatePresence>
+                            {!loading && fileUrl && data && (() => {
+                                return (
+                                    <PdfViewerInner fileUrl={fileUrl} annotations={data.aiScore != null && !isPastVersion ? (data.annotations ?? []) : []} activeAnnotation={activeAnnotation} onAnnotationClick={setActiveAnnotation} onPageRefsReady={(refs) => { pageRefs.current = refs; }} />
+                                );
+                            })()}
                         </Card>
                     </motion.div>
 
@@ -339,13 +336,15 @@ export default function FeedbackStudioPage() {
                         <>
                             {data.isIrrelevant ? (
                                 <IrrelevantBanner assignmentId={assignmentId} classId={classId} />
+                            ) : isPastVersion ? (
+                                <PastVersionBanner />
                             ) : (
                                 <>
                                     <ScoresCard data={data} aiTimedOut={aiTimedOut} />
                                     <InstructorCommentCard comment={data.comment} />
-                                    <AnnotationSidebar annotations={data.aiScore != null ? data.annotations : []} activeId={activeAnnotation} onSelect={setActiveAnnotation} aiTimedOut={aiTimedOut} />
-                                    <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} aiTimedOut={aiTimedOut} />
-                                    <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} aiTimedOut={aiTimedOut} />
+                                    <AnnotationSidebar annotations={data.aiScore != null ? data.annotations : []} activeId={activeAnnotation} onSelect={setActiveAnnotation} aiTimedOut={aiTimedOut} status={data.status} />
+                                    <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} aiTimedOut={aiTimedOut} status={data.status} />
+                                    <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} aiTimedOut={aiTimedOut} status={data.status} />
                                 </>
                             )}
                         </>

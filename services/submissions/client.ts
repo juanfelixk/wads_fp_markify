@@ -29,8 +29,11 @@ export async function uploadSubmission(classId: string, assignmentId: string, fi
     });
 }
 
-export async function fetchSubmissionFileUrl(classId: string, assignmentId: string): Promise<string> {
-    const res = await fetch(`/api/v1/classes/${classId}/assignments/${assignmentId}/file`);
+export async function fetchSubmissionFileUrl(classId: string, assignmentId: string, versionId?: string): Promise<string> {
+    const url = versionId
+        ? `/api/v1/classes/${classId}/assignments/${assignmentId}/file?versionId=${versionId}`
+        : `/api/v1/classes/${classId}/assignments/${assignmentId}/file`;
+    const res = await fetch(url, { cache: "no-store" });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error ?? "Failed to fetch file URL");
     return json.url;

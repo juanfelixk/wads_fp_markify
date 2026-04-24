@@ -4,10 +4,10 @@ import { GrammarFeedback } from "@/services/feedback/types";
 import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
-import { Type, Loader2, ChevronUp, ChevronDown, AlertCircle } from "lucide-react";
+import { Type, Loader2, ChevronUp, ChevronDown, AlertCircle, Check } from "lucide-react";
 import { Badge } from "../ui/badge";
 
-export default function GrammarCard({ grammar, aiTimedOut }: { grammar: GrammarFeedback | null; aiTimedOut?: boolean }) {
+export default function GrammarCard({ grammar, aiTimedOut, status }: { grammar: GrammarFeedback | null; aiTimedOut?: boolean; status: string; }) {
     const [open, setOpen] = useState(false);
     if (!grammar || !grammar.issues?.length) {
         return (
@@ -19,6 +19,10 @@ export default function GrammarCard({ grammar, aiTimedOut }: { grammar: GrammarF
                     {aiTimedOut? (
                         <p className="text-sm italic flex items-center gap-2 text-amber-500">
                             <AlertCircle className="w-3.5 h-3.5" /> AI currently unavailable, please try again later.
+                        </p>
+                    ) : status === "TO_BE_REVIEWED" ? (
+                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" /> No issue found.
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic flex items-center gap-2">

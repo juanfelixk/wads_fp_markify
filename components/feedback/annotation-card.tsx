@@ -3,9 +3,9 @@
 import { Annotation } from "@/services/feedback/types";
 import { Card, CardContent } from "../ui/card";
 import { annotationStyle } from "@/services/feedback/constants";
-import { AlertCircle, Loader2, PencilLine } from "lucide-react";
+import { AlertCircle, Check, Loader2, PencilLine } from "lucide-react";
 
-export default function AnnotationSidebar({ annotations, activeId, onSelect, aiTimedOut }: { annotations: Annotation[]; activeId: string | null; onSelect: (id: string | null) => void; aiTimedOut?: boolean }) {
+export default function AnnotationSidebar({ annotations, activeId, onSelect, aiTimedOut, status }: { annotations: Annotation[]; activeId: string | null; onSelect: (id: string | null) => void; aiTimedOut?: boolean; status: string; }) {
     if (!annotations || annotations.length === 0) {
         return (
             <Card className="border-dashed">
@@ -13,9 +13,13 @@ export default function AnnotationSidebar({ annotations, activeId, onSelect, aiT
                     <h3 className="text-base font-semibold flex items-center gap-2">
                         <PencilLine className="w-4 h-4 text-primary" /> Inline Annotations
                     </h3>
-                    {aiTimedOut? (
+                    {aiTimedOut ? (
                         <p className="text-sm italic flex items-center gap-2 text-amber-500">
                             <AlertCircle className="w-3.5 h-3.5" /> AI currently unavailable, please try again later.
+                        </p>
+                    ) : status === "TO_BE_REVIEWED" ? (
+                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" /> No issue found.
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic flex items-center gap-2">

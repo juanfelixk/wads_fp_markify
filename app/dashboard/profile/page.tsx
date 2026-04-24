@@ -36,6 +36,7 @@ export default function ProfilePage() {
         if (!/[a-z]/.test(newPassword)) return "Password must include at least one lowercase letter.";
         if (!/[A-Z]/.test(newPassword)) return "Password must include at least one uppercase letter.";
         if (newPassword !== confirmPassword) return "Passwords do not match.";
+        if (newPassword === currentPassword) return "No change detected."
         return null;
     };
 

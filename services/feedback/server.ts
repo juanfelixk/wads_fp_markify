@@ -5,7 +5,7 @@ import { getSession } from "@/services/auth/server";
 import type { FeedbackPageData } from "./types";
 import { RubricCriterion } from "../assignments/types";
 
-export async function getFeedbackPageData(classId: string, assignmentId: string): Promise<FeedbackPageData> {
+export async function getFeedbackPageData(classId: string, assignmentId: string, versionId?: string): Promise<FeedbackPageData> {
     const session = await getSession();
     if (!session?.user) throw new Error("Unauthorized");
     
@@ -34,6 +34,15 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
     });
     
     if (!submission) throw new Error("Not found");
+
+    let displayFileName = submission.fileName;
+    if (versionId) {
+        const version = await prisma.submissionVersion.findUnique({
+            where: { id: versionId },
+            select: { fileName: true },
+        });
+        if (version?.fileName) displayFileName = version.fileName;
+    }
     
     const { assignment } = submission;
     const { class: cls } = assignment;
@@ -48,7 +57,7 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
     
         isIrrelevant: submission.isIrrelevant,
         status: submission.status,
-        fileName: submission.fileName,
+        fileName: displayFileName,
         aiScore: submission.aiScore,
         finalScore: submission.finalScore,
         comment: submission.comment,
@@ -61,16 +70,12 @@ export async function getFeedbackPageData(classId: string, assignmentId: string)
         criterionScores: submission.criterionScores,
     
         annotations: submission.annotations.map((a) => ({
-        id: a.id,
-        page: a.page,
-        x: a.x,
-        y: a.y,
-        width: a.width,
-        height: a.height,
-        content: a.content,
-        quote: a.quote,
-        type: a.type,
-        source: a.source,
+            id: a.id,
+            page: a.page,
+            content: a.content,
+            quote: a.quote,
+            type: a.type,
+            source: a.source,
         })),
     };
 }

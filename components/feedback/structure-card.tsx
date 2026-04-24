@@ -4,10 +4,10 @@ import { StructureFeedback } from "@/services/feedback/types";
 import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
-import { Loader2, ChevronUp, ChevronDown, AlignLeft, AlertCircle } from "lucide-react";
+import { Loader2, ChevronUp, ChevronDown, AlignLeft, AlertCircle, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
-export default function StructureCard({ structure, aiTimedOut }: { structure: StructureFeedback | null; aiTimedOut?: boolean }) {
+export default function StructureCard({ structure, aiTimedOut, status }: { structure: StructureFeedback | null; aiTimedOut?: boolean; status: string; }) {
     const [open, setOpen] = useState(false);
     if (!structure || !structure.sections?.length) {
         return (
@@ -19,6 +19,10 @@ export default function StructureCard({ structure, aiTimedOut }: { structure: St
                 {aiTimedOut? (
                         <p className="text-sm italic flex items-center gap-2 text-amber-500">
                             <AlertCircle className="w-3.5 h-3.5" /> AI currently unavailable, please try again later.
+                        </p>
+                    ) : status === "TO_BE_REVIEWED" ? (
+                        <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                            <Check className="w-3.5 h-3.5" /> No issue found.
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic flex items-center gap-2">

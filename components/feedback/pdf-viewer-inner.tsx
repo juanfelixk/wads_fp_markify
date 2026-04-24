@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Loader2, AlertCircle, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { annotationStyle } from "@/services/feedback/constants";
-import type { Annotation } from "@/services/feedback/types";
+import type { Annotation, PdfjsTextItem } from "@/services/feedback/types";
+import "react-pdf/dist/Page/TextLayer.css";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import { findHighlightRectsOnPage } from "@/services/feedback/annotation-utils";
+import type { TextRect, PageTextData } from "@/services/feedback/types";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -17,158 +21,156 @@ interface Props {
   onPageRefsReady: (refs: Map<number, HTMLDivElement>) => void;
 }
 
-interface ResolvedRect { // in px
-  left: number;
-  top: number;
-  width: number;
-  height: number;
+interface ResolvedAnnotation {
+  page: number;
+  rects: TextRect[];
 }
 
-// Search for `quote` text in pdfjs text items and return a bounding rect
-// in the PDF's own coordinate space (bottom-left origin, pts).
-async function findQuoteRect(pdfDoc: pdfjs.PDFDocumentProxy, pageNum: number, quote: string): Promise<{ x: number; y: number; w: number; h: number; vpWidth: number; vpHeight: number } | null> {
-  const page = await pdfDoc.getPage(pageNum);
-  const viewport = page.getViewport({ scale: 1 });
-  const textContent = await page.getTextContent();
-
-  // Flatten all items into a single string + track char→item mapping
-  const items = textContent.items as Array<{ str: string; transform: number[]; width: number; height: number }>;
-
-  // Build a flat string with spaces between items
-  let flat = "";
-  const charMap: Array<{ itemIdx: number; charIdx: number }> = [];
-  for (let i = 0; i < items.length; i++) {
-    const str = items[i].str;
-    for (let j = 0; j < str.length; j++) {
-      charMap.push({ itemIdx: i, charIdx: j });
-      flat += str[j];
-    }
-    if (i < items.length - 1) {
-      charMap.push({ itemIdx: i, charIdx: -1 }); // space
-      flat += " ";
-    }
-  }
-
-  // Normalise both sides: collapse whitespace, lowercase
-  const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
-  const needle = norm(quote);
-  const haystack = norm(flat);
-
-  const matchIdx = haystack.indexOf(needle);
-  if (matchIdx === -1) return null;
-
-  // Map match start/end back to real chars (skip the spaces we injected)
-  let hi = 0; // index into haystack
-  let fi = 0; // index into flat
-  const flatToHaystack: number[] = []; // flat index → haystack index
-  for (let k = 0; k < flat.length; k++) {
-    flatToHaystack.push(hi);
-    const fc = flat[k].toLowerCase();
-    if (fc === " " && haystack[hi] === " ") { hi++; }
-    else if (fc !== " " || haystack[hi] !== " ") { hi++; }
-  }
-
-  // Find which flat chars correspond to our match
-  const matchStart = flatToHaystack.indexOf(matchIdx);
-  const matchEnd = flatToHaystack.indexOf(matchIdx + needle.length - 1);
-
-  if (matchStart === -1 || matchEnd === -1) return null;
-
-  // Collect the pdfjs items that cover the match
-  const coveredItems = new Set<number>();
-  for (let k = matchStart; k <= matchEnd; k++) {
-    if (charMap[k]?.charIdx !== -1) coveredItems.add(charMap[k].itemIdx);
-  }
-
-  // Union their bounding boxes (PDF coords: bottom-left origin)
-  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-  for (const idx of coveredItems) {
-    const item = items[idx];
-    const [, , , , tx, ty] = item.transform; // tx=x, ty=y (bottom-left of text)
-    const iw = item.width;
-    const ih = item.height || 12;
-    minX = Math.min(minX, tx);
-    minY = Math.min(minY, ty);
-    maxX = Math.max(maxX, tx + iw);
-    maxY = Math.max(maxY, ty + ih);
-  }
-
-  return {
-    x: minX,
-    y: minY,
-    w: maxX - minX,
-    h: maxY - minY,
-    vpWidth: viewport.width,
-    vpHeight: viewport.height,
-  };
-}
-
-// Convert PDF point coords (bottom-left origin) → CSS px (top-left origin)
-// scaled to the rendered canvas size.
-function pdfRectToCss(
-  rect: { x: number; y: number; w: number; h: number; vpWidth: number; vpHeight: number },
-  scale: number
-): ResolvedRect {
-  // pdfjs viewport already accounts for the page's media box
-  const scaleX = (rect.vpWidth * scale) / rect.vpWidth;
-  const left   = rect.x * scaleX;
-  const width  = rect.w * scaleX;
-  // flip y: CSS top = vpHeight - (pdfY + pdfHeight)
-  const top    = (rect.vpHeight - rect.y - rect.h) * scale;
-  const height = rect.h * scale;
-  return { left, top, width, height };
-}
-
-export default function PdfViewerInner({
-  fileUrl,
-  annotations,
-  activeAnnotation,
-  onAnnotationClick,
-  onPageRefsReady,
-}: Props) {
+export default function PdfViewerInner({ fileUrl, annotations, activeAnnotation, onAnnotationClick, onPageRefsReady }: Props) {
   const [numPages, setNumPages] = useState(0);
-  const [scale, setScale]       = useState(1);
-  const [pdfDoc, setPdfDoc]     = useState<pdfjs.PDFDocumentProxy | null>(null);
-  // resolvedRects[annId] = CSS pixel rect relative to the page div
-  const [resolvedRects, setResolvedRects] = useState<Record<string, ResolvedRect>>({});
+  const [scale, setScale] = useState(1);
+  const [renderedPages, setRenderedPages] = useState<Set<number>>(new Set());
+  const renderedPagesRef = useRef<Set<number>>(new Set());
+  const [resolved, setResolved] = useState<Map<string, ResolvedAnnotation>>(new Map());
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  const resolveTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Re-resolve when scale or annotations change
+  // pdfjs-extracted text data
+  const pageTextsRef = useRef<Map<number, PageTextData>>(new Map());
+  const [pageTextsReady, setPageTextsReady] = useState(false);
+
   useEffect(() => {
-    if (!pdfDoc || annotations.length === 0) return;
-    let cancelled = false;
+    if (!fileUrl) return;
+    pageTextsRef.current.clear();
+    setPageTextsReady(false);
 
-    async function resolveAll() {
-      const result: Record<string, ResolvedRect> = {};
+    const loadingTask = pdfjs.getDocument(fileUrl);
+
+    loadingTask.promise.then(async (pdf) => {
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent();
+        const items = content.items as PdfjsTextItem[];
+        let joined = "";
+        const itemOffsets: number[] = [];
+        for (let i = 0; i < items.length; i++) {
+          itemOffsets.push(joined.length);
+          joined += items[i].str;
+          if (i < items.length - 1) {
+            joined += items[i].hasEOL ? "\n" : " ";
+          }
+        }
+        pageTextsRef.current.set(p, { joined, itemOffsets, items });
+      }
+      setPageTextsReady(true);
+    }).catch((err) => {
+      console.error("[pdfjs] failed to extract text:", err);
+    });
+    return () => {
+      loadingTask.destroy?.();
+    };
+  }, [fileUrl]);
+
+  const resolveHighlights = useCallback(() => {
+    if (pageTextsRef.current.size === 0) return;
+    setResolved((prev) => {
+      const next = new Map<string, ResolvedAnnotation>();
       for (const ann of annotations) {
         if (!ann.quote) continue;
-        try {
-          const rect = await findQuoteRect(pdfDoc!, ann.page, ann.quote);
-          if (rect && !cancelled) {
-            result[ann.id] = pdfRectToCss(rect, scale);
+        const existing = prev.get(ann.id);
+        if (existing) {
+          const pageEl = pageRefs.current.get(existing.page);
+          const pageTextData = pageTextsRef.current.get(existing.page);
+          if (pageEl && pageTextData && renderedPagesRef.current.has(existing.page)) {
+            const rects = findHighlightRectsOnPage(pageEl, ann.quote, pageTextData);
+            if (rects) {
+              next.set(ann.id, { page: existing.page, rects });
+              continue;
+            }
           }
-        } catch {
-          // fall back to percentage position
+        }
+        // search all rendered pages
+        for (const [pageNum, pageEl] of pageRefs.current) {
+          if (!renderedPagesRef.current.has(pageNum)) continue;
+          const pageTextData = pageTextsRef.current.get(pageNum);
+          if (!pageTextData) continue;
+          const rects = findHighlightRectsOnPage(pageEl, ann.quote, pageTextData);
+          if (rects) {
+            next.set(ann.id, { page: pageNum, rects });
+            break;
+          }
         }
       }
-      if (!cancelled) setResolvedRects(result);
-    }
+      return next;
+    });
+  }, [annotations]);
 
-    resolveAll();
-    return () => { cancelled = true; };
-  }, [pdfDoc, annotations, scale]);
+  const resolveHighlightsRef = useRef(resolveHighlights);
+  useEffect(() => { resolveHighlightsRef.current = resolveHighlights; }, [resolveHighlights]);
+
+  useEffect(() => {
+    if (annotations.length > 0 && renderedPagesRef.current.size > 0 && pageTextsReady) {
+      resolveHighlightsRef.current();
+    }
+  }, [annotations, pageTextsReady]);
+
+  function scheduleResolveForPage(pageNum: number) {
+    const key = String(pageNum);
+    const prev150 = resolveTimers.current.get(`${key}-150`);
+    const prev600 = resolveTimers.current.get(`${key}-600`);
+    if (prev150) clearTimeout(prev150);
+    if (prev600) clearTimeout(prev600);
+
+    resolveTimers.current.set(
+      `${key}-150`,
+      setTimeout(() => resolveHighlightsRef.current(), 150)
+    );
+    resolveTimers.current.set(
+      `${key}-600`,
+      setTimeout(() => resolveHighlightsRef.current(), 600)
+    );
+  }
+
+  useEffect(() => {
+    return () => {
+      for (const t of resolveTimers.current.values()) clearTimeout(t);
+    };
+  }, []);
 
   function handleLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
     onPageRefsReady(pageRefs.current);
   }
 
+  function handlePageRenderSuccess(pageNum: number) {
+    renderedPagesRef.current.add(pageNum);
+    setRenderedPages((prev) => {
+      const next = new Set(prev);
+      next.add(pageNum);
+      return next;
+    });
+    scheduleResolveForPage(pageNum);
+  }
+
   function zoom(delta: number) {
     setScale((s) => Math.min(2, Math.max(0.5, Math.round((s + delta) * 10) / 10)));
+    renderedPagesRef.current = new Set();
+    setResolved(new Map());
+    setRenderedPages(new Set());
+  }
+
+  const annsByActualPage = new Map<number, Array<{ ann: Annotation; res: ResolvedAnnotation }>>();
+  for (const ann of annotations) {
+    const res = resolved.get(ann.id);
+    if (!res) continue;
+    const bucket = annsByActualPage.get(res.page) ?? [];
+    bucket.push({ ann, res });
+    annsByActualPage.set(res.page, bucket);
   }
 
   return (
     <>
+      {/* zoom controls */}
       <div className="flex items-center px-3 py-2 border-b bg-muted/60 gap-1">
         <Button variant="ghost" size="icon" className="h-7 w-7 ml-auto cursor-pointer" onClick={() => zoom(-0.1)} disabled={scale <= 0.5}>
           <ZoomOut className="w-3.5 h-3.5" />
@@ -182,13 +184,7 @@ export default function PdfViewerInner({
       </div>
 
       <div className="overflow-auto" style={{ maxHeight: "75vh" }}>
-        <Document
-  file={fileUrl}
-  onLoadSuccess={(pdf) => {
-    handleLoadSuccess({ numPages: pdf.numPages });
-    setPdfDoc(pdf);          // ← pdf IS the PDFDocumentProxy
-  }}
-          loading={
+        <Document file={fileUrl} onLoadSuccess={handleLoadSuccess} loading={
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
@@ -197,70 +193,38 @@ export default function PdfViewerInner({
             <div className="flex items-center justify-center py-12 text-sm text-destructive gap-2">
               <AlertCircle className="w-4 h-4" /> Failed to load PDF.
             </div>
-          }
-        >
+          }>
           {Array.from({ length: numPages }, (_, i) => {
-            const pageNum  = i + 1;
-            const pageAnns = annotations.filter((a) => a.page === pageNum);
+            const pageNum = i + 1;
+            const pageAnns = annsByActualPage.get(pageNum) ?? [];
 
             return (
-              <div
-                key={pageNum}
-                ref={(el) => { if (el) pageRefs.current.set(pageNum, el); }}
-                className="relative mx-auto my-3 shadow-md w-fit"
-              >
-                <Page
-                  pageNumber={pageNum}
-                  scale={scale}
-                  renderAnnotationLayer
-                  renderTextLayer
-                />
+              <div key={pageNum} ref={(el) => { if (el) pageRefs.current.set(pageNum, el); }} className="relative mx-auto my-3 shadow-md w-fit">
+                <Page pageNumber={pageNum} scale={scale} renderAnnotationLayer renderTextLayer onRenderSuccess={() => handlePageRenderSuccess(pageNum)} />
 
-                {pageAnns.map((ann) => {
+                {/* per annotation highlight overlays */}
+                {pageAnns.map(({ ann, res }) => {
                   const isActive = activeAnnotation === ann.id;
                   const s = annotationStyle[ann.type];
                   const Icon = s.icon;
 
-                  // Prefer text-search resolved rect; fall back to AI-stored coords
-// DB stores values in PDF points (same space as pdfjs), so convert them
-// the same way as resolved rects rather than treating them as percentages.
-const resolved = resolvedRects[ann.id];
-
-let style: React.CSSProperties;
-if (resolved) {
-  style = {
-    left:   resolved.left,
-    top:    resolved.top,
-    width:  resolved.width,
-    height: resolved.height,
-  };
-} else if (ann.width != null && ann.height != null) {
-  // ann.x/y are PDF points (bottom-left origin); convert to CSS px
-  // We need the viewport to do this properly, so approximate using
-  // the standard A4 PDF point height (841.89 pt) at current scale.
-  // This is only the fallback — quotes resolve via text search above.
-  const PDF_PAGE_HEIGHT_PT = 841.89;
-  style = {
-    left:   ann.x * scale,
-    top:    (PDF_PAGE_HEIGHT_PT - ann.y - ann.height) * scale,
-    width:  ann.width * scale,
-    height: ann.height * scale,
-  };
-} else {
-  style = { left: "10%", top: "10%", width: "20%", height: "3%" };
-}
-
                   return (
-                    <button
-                      key={ann.id}
-                      onClick={() => onAnnotationClick(isActive ? null : ann.id)}
-                      style={style}
-                      className={`absolute cursor-pointer transition-all mix-blend-multiply dark:mix-blend-screen rounded-sm border ${s.bg} ${isActive ? `${s.border}`: ""}`}
-                    >
-                      <span className={`absolute -top-3 -left-3 w-5 h-5 rounded-full flex items-center justify-center shadow mix-blend-normal ${s.bg} ${s.border} border transition-transform ${isActive ? "scale-140" : ""}`}>
-                        <Icon className={`w-3 h-3 ${s.text}`} />
-                      </span>
-                    </button>
+                    <div key={ann.id} className="absolute inset-0 pointer-events-none">
+                      {res.rects.map((rect, ri) => (
+                        <span key={ri} onClick={() => onAnnotationClick(isActive ? null : ann.id)} style={{ position: "absolute", left: rect.left, top: rect.top, width: rect.width, height: rect.height, backgroundColor: s.rawColor, mixBlendMode: "multiply", cursor: "pointer", pointerEvents: "auto", outline: isActive ? `1px solid ${s.rawBorderColor}` : "none", }} />
+                      ))}
+
+                      {res.rects[0] && (
+                        <span className={`absolute w-5 h-5 rounded-full flex items-center justify-center shadow ${s.bg} ${s.border} border mix-blend-normal transition-transform ${isActive ? "scale-140" : ""}`}
+                          style={{ left: res.rects[0].left - 12, top: res.rects[0].top  - 12, pointerEvents: "auto", cursor: "pointer", }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAnnotationClick(isActive ? null : ann.id);
+                          }}>
+                          <Icon className={`w-3 h-3 ${s.text}`} />
+                        </span>
+                      )}
+                    </div>
                   );
                 })}
               </div>

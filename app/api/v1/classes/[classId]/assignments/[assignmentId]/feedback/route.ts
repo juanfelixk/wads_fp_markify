@@ -1,11 +1,12 @@
 import { getFeedbackPageData } from "@/services/feedback/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ classId: string, assignmentId: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ classId: string, assignmentId: string }> }) {
     const { classId, assignmentId } = await params;
+    const versionId = req.nextUrl.searchParams.get("versionId") ?? undefined;
 
     try {
-        const data = await getFeedbackPageData(classId, assignmentId);
+        const data = await getFeedbackPageData(classId, assignmentId, versionId);
         return NextResponse.json({ data });
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Internal error";

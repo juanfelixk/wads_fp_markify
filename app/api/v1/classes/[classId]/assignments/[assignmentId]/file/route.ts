@@ -4,6 +4,7 @@ import { getSubmissionFileUrl } from "@/services/submissions/server";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ classId: string; assignmentId: string }> }) {
     const { classId, assignmentId } = await params;
+    const versionId = _req.nextUrl.searchParams.get("versionId") ?? undefined;
 
     try {
         const session = await getSession();
@@ -13,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ cla
 
         const studentId = session.user.id;
         // get url
-        const url = await getSubmissionFileUrl(classId, assignmentId, studentId);
+        const url = await getSubmissionFileUrl(classId, assignmentId, studentId, versionId);
         return NextResponse.json({ url });
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Internal error";

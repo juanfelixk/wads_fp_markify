@@ -6,4 +6,5 @@ export default async function DashboardPage() {
     if (!session) redirect("/auth/login");
     if (session.user.role.toUpperCase() === "STUDENT") redirect("/dashboard/student");
     if (session.user.role.toUpperCase() === "LECTURER") redirect("/dashboard/lecturer");
+    if (session.user.role.toUpperCase() === "ADMIN") redirect("/dashboard/admin");
 }

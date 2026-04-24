@@ -26,6 +26,7 @@ export async function middleware(req: NextRequest) {
     if (pathname.startsWith("/auth")) {
         if (role === "STUDENT") return NextResponse.redirect(new URL("/dashboard/student", req.url));
         if (role === "LECTURER") return NextResponse.redirect(new URL("/dashboard/lecturer", req.url));
+        if (role === "ADMIN") return NextResponse.redirect(new URL("/dashboard/admin", req.url));
     }
 
     // role-based route protection
@@ -33,6 +34,9 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     if (pathname.startsWith("/dashboard/lecturer") && role !== "LECTURER") {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    if (pathname.startsWith("/dashboard/admin") && role !== "ADMIN") {
         return NextResponse.redirect(new URL("/dashboard", req.url));
     }
 

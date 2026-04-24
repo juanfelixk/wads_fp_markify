@@ -7,6 +7,7 @@ import { Prisma } from "@/generated/prisma";
 import { getPresignedUrl } from "@/lib/storage";
 import { GradingResult } from "./types";
 import Groq from "groq-sdk";
+import { resolveAnnotationPages } from "../feedback/annotation-utils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const GOOGLE_MODEL = "gemini-3.1-flash-lite-preview";
@@ -79,10 +80,6 @@ function buildPrompt(rubric: RubricCriterion[], maxPoints: number, assignmentTit
       "annotations": [
         {
           "page": <1-based integer>,
-          "x": <float — left edge of the highlighted text as % of page width, 0-90>,
-          "y": <float — top edge of the highlighted text as % of page height, 0-90>,
-          "width":  <float — width of the text span as % of page width, typically 10-60>,
-          "height": <float — height of one or two lines of text as % of page height, typically 2-6>,
           "type": "<PRAISE|ISSUE|SUGGESTION>",
           "content": "<your comment, 1-3 sentences>",
           "quote": "<exact short text this annotation covers, max 25 words>"
@@ -92,9 +89,9 @@ function buildPrompt(rubric: RubricCriterion[], maxPoints: number, assignmentTit
 
     Rules (RELEVANT only):
     - Provide 5-10 annotations spread across different pages.
-    - Every annotation MUST include width and height, never null.
-    - x/y mark the TOP-LEFT corner of the text run being annotated.
-    - width/height should tightly wrap the quoted text, not the whole page.
+    - quote must be the exact verbatim text from the submission, this is used to locate the highlight position automatically.
+    - quote MUST be non-overlapping, no quote may be fully or partially contained within another quote.
+    - Prefer shorter, precise quotes over long spans when overlap would occur.
     - Score strictly per rubric. Award 0 for any criterion not addressed.
     - aiScore must equal the sum of all pointsAwarded values.
     - List up to 8 grammar issues, most impactful only.
@@ -265,13 +262,18 @@ export async function gradeSubmission(assignmentId: string, studentId: string, p
           });
         }
 
+        // manually decide the page for each quote
+        const resolvedAnnotations = await resolveAnnotationPages(pdfBuffer, result.annotations ?? []);
+
         // create inline annotations
-        if (result.annotations?.length) {
+        if (resolvedAnnotations?.length) {
           await tx.submissionAnnotation.createMany({
-            data: result.annotations.map((ann) => ({
-              submissionId, page: ann.page, x: ann.x, y: ann.y,
-              width: ann.width ?? null, height: ann.height ?? null,
-              type: ann.type, content: ann.content, quote: ann.quote ?? null,
+            data: resolvedAnnotations.map((ann) => ({
+              submissionId,
+              page: ann.page,
+              type: ann.type,
+              content: ann.content,
+              quote: ann.quote ?? null,
               source: "AI" as const,
             })),
           });

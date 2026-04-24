@@ -152,6 +152,11 @@ function UploadZone({ classId, assignmentId, isBlocked, onUploaded }: {classId: 
 function VersionRow({ version, classId, assignmentId, isCurrent = false }: { version: SubmissionVersionData; classId: string; assignmentId: string; isCurrent?: boolean; }) {
     const [loading] = useState(false);
 
+    // pass version id for past versions
+    const feedbackUrl = isCurrent
+        ? `/dashboard/student/class/${classId}/assignment/${assignmentId}/feedback`
+        : `/dashboard/student/class/${classId}/assignment/${assignmentId}/feedback?versionId=${version.id}`;
+
     return (
         <div className={`flex items-center justify-between p-3 rounded-lg border ${isCurrent ? "bg-muted/40" : "bg-card"}`}>
             <div className="flex items-center gap-3 min-w-0">
@@ -167,7 +172,7 @@ function VersionRow({ version, classId, assignmentId, isCurrent = false }: { ver
                     </p>
                 </div>
             </div>
-            <Button variant={isCurrent ? "outline" : "ghost"} size="sm" className={`gap-1.5 shrink-0 cursor-pointer ${!isCurrent && "text-muted-foreground"}`} onClick={() => window.open(`/dashboard/student/class/${classId}/assignment/${assignmentId}/feedback`, "_blank")} disabled={loading}>
+            <Button variant={isCurrent ? "outline" : "ghost"} size="sm" className={`gap-1.5 shrink-0 cursor-pointer ${!isCurrent && "text-muted-foreground"}`} onClick={() => window.open(feedbackUrl, "_blank")} disabled={loading}>
                 <Eye className="w-3.5 h-3.5" />
                 {isCurrent && <span className="hidden sm:inline">View Feedback</span>}
             </Button>

@@ -9,12 +9,14 @@ export default async function DashboardLayout({children,}: {children: React.Reac
     if (!session) {
         redirect("/auth/login");
     }
-
-    // skip enrollment check for onboarding page to avoid redirect loop
-    const isOnboarding = false; // handled below via separate layout
-    const enrollments = await getEnrolledClasses(session.user.id);
-    if (enrollments.length === 0) {
-        redirect("/onboarding");
+    
+    if (session.user.role === "STUDENT") {
+        // skip enrollment check for onboarding page to avoid redirect loop
+        const isOnboarding = false; // handled below via separate layout
+        const enrollments = await getEnrolledClasses(session.user.id);
+        if (enrollments.length === 0) {
+            redirect("/onboarding");
+        }
     }
     
     return (

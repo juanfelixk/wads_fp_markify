@@ -11,7 +11,7 @@ function formatVersion(v: {
     id: string;
     version: number;
     fileName: string;
-    fileSize: number;
+    fileSize: number
     fileUrl: string;
     uploadedAt: Date;
 }): SubmissionVersionData {
@@ -158,7 +158,7 @@ export async function recordSubmissionUpload(classId: string, assignmentId: stri
     };
 }
 
-export async function getSubmissionFileUrl(classId: string, assignmentId: string, studentId: string) {
+export async function getSubmissionFileUrl(classId: string, assignmentId: string, studentId: string, versionId?: string) {
     // verify enrollment
     const enrollment = await prisma.enrollment.findUnique({
         where: { studentId_classId: { studentId, classId } },
@@ -167,13 +167,23 @@ export async function getSubmissionFileUrl(classId: string, assignmentId: string
         throw new Error("Forbidden");
     };
 
+    // get url for past versions
+    if (versionId) {
+        const version = await prisma.submissionVersion.findUnique({
+            where: { id: versionId },
+            include: { submission: { select: { studentId: true } } },
+        });
+        if (!version || version.submission.studentId !== studentId) throw new Error("Not found");
+        return await getPresignedUrl(version.fileUrl);
+    }
+
     // verify valid submission
     const submission = await getStudentSubmission(assignmentId, studentId);
     if (!submission?.currentFile) {
         throw new Error("Not found");
     };
 
-    // get url
+    // get url for current version
     const url = await getPresignedUrl(submission.currentFile.fileUrl);
 
     return url;

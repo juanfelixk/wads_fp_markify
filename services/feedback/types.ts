@@ -27,10 +27,6 @@ export type AnnotationSource = "AI" | "LECTURER";
 export interface Annotation {
   id: string;
   page: number;
-  x: number;
-  y: number;
-  width: number | null;
-  height: number | null;
   content: string;
   quote: string | null;
   type: AnnotationType;
@@ -56,4 +52,22 @@ export interface StructureFeedback {
         maxScore: number;
         feedback: string
     }[];
+}
+
+export interface TextRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export interface PdfjsTextItem {
+  str: string;
+  hasEOL?: boolean;
+}
+
+export interface PageTextData {
+  joined: string;
+  itemOffsets: number[];
+  items: PdfjsTextItem[];
 }
