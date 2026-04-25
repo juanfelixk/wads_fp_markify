@@ -21,7 +21,7 @@ export default async function DashboardLayout({children,}: {children: React.Reac
     
     return (
         <div className="min-h-screen flex flex-col bg-background">
-            <Navbar userName={session?.user?.name ?? "User"} />
+            <Navbar userName={session?.user?.name ?? "User"} role={session?.user?.role} />
             <main className="flex-1 bg-muted-foreground/12">{children}</main>
             <Footer />
         </div>

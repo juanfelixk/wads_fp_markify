@@ -24,6 +24,11 @@ export const auth = betterAuth({
         required: true,
         defaultValue: "STUDENT",
       },
+      institution: {
+        type: "string",
+        required: false,
+        input: false,
+      }
     },
   },
   databaseHooks: {

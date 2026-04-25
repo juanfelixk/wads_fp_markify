@@ -7,6 +7,10 @@ type SessionData = typeof auth.$Infer.Session;
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
+    if (pathname === "/") {
+        return NextResponse.redirect(new URL("/auth/login", req.url))
+    }
+
     const { data: session } = await betterFetch<SessionData>("/api/v1/auth/get-session", {
         baseURL: req.nextUrl.origin,
         headers: { cookie: req.headers.get("cookie") ?? "" },
@@ -44,5 +48,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/auth/((?!login|register).+)"],
+    matcher: ["/", "/dashboard/:path*", "/auth/((?!login|register).+)"],
 };

@@ -7,7 +7,7 @@ export async function uploadSubmission(classId: string, assignmentId: string, fi
         formData.append("file", file);
 
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", `/api/v1/classes/${classId}/assignments/${assignmentId}/submit`);
+        xhr.open("POST", `/api/v1/class/${classId}/assignment/${assignmentId}/submit`);
 
         if (onProgress) {
             xhr.upload.addEventListener("progress", (e) => {
@@ -31,8 +31,8 @@ export async function uploadSubmission(classId: string, assignmentId: string, fi
 
 export async function fetchSubmissionFileUrl(classId: string, assignmentId: string, versionId?: string): Promise<string> {
     const url = versionId
-        ? `/api/v1/classes/${classId}/assignments/${assignmentId}/file?versionId=${versionId}`
-        : `/api/v1/classes/${classId}/assignments/${assignmentId}/file`;
+        ? `/api/v1/class/${classId}/assignment/${assignmentId}/file?versionId=${versionId}`
+        : `/api/v1/class/${classId}/assignment/${assignmentId}/file`;
     const res = await fetch(url, { cache: "no-store" });
     const json = await res.json();
     if (!res.ok) throw new Error(json.error ?? "Failed to fetch file URL");

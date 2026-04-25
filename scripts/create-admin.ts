@@ -26,10 +26,11 @@ const auth = betterAuth({
 async function main() {
   const email = process.argv[2];
   const password = process.argv[3];
-  const name = process.argv.slice(4).join(" ");
+  const institution = process.argv[4];
+  const name = process.argv[5];
 
   if (!email || !password || !name) {
-    console.error("Usage: npm run create-admin <email> <password> <name>");
+    console.error("Usage: npm run create-admin <email> <password> <institution> <name>");
     process.exit(1);
   }
 
@@ -44,7 +45,7 @@ async function main() {
 
   await prisma.user.update({
     where: { id: result.user.id },
-    data: { role: "ADMIN", status: "ACTIVE", emailVerified: true },
+    data: { role: "ADMIN", status: "ACTIVE", emailVerified: true, institution: institution },
   });
 
   console.log(`Admin account created for ${email} (id: ${result.user.id})`);
@@ -56,4 +57,4 @@ main().catch((err) => {
   process.exit(1);
 });
 
-// npm run create-admin admin@binus.ac.id Binus12345678 "Yohanes Saputra"
+// npm run create-admin admin-binter@binus.ac.id Binus12345678 "BINUS University International" "Yohanes Saputra"

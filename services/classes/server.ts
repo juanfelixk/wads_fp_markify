@@ -1,6 +1,20 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 
+export async function getLecturerClasses(lecturerId: string) {
+    return prisma.class.findMany({
+        where: { lecturerId },
+        select: {
+            id: true,
+            code: true,
+            academicYear: true,
+            course: { select: { code: true, name: true } },
+            _count: { select: { enrollments: true } },
+        },
+        orderBy: { createdAt: "desc" },
+    });
+}
+
 export async function getEnrolledClasses(studentId: string) {
     const enrollments = await prisma.enrollment.findMany({
         where: { studentId },
@@ -72,12 +86,12 @@ export async function enrollStudent(studentId: string, courseCode: string, class
         throw new Error("Invalid enrollment key.");
     }
 
-    // check institution
-    const existing = await prisma.enrollment.findFirst({
-        where: { studentId },
-        include: { class: { include: { course: { select: { institution: true } } } } },
+    // check institution via user.institution (only for non first time)
+    const student = await prisma.user.findUnique({
+        where: { id: studentId },
+        select: { institution: true },
     });
-    if (existing && existing.class.course.institution !== course.institution) {
+    if (student?.institution && student.institution !== course.institution) {
         throw new Error("This class belongs to a different institution. Please enroll with a new account for that institution.");
     }
 
@@ -89,13 +103,18 @@ export async function enrollStudent(studentId: string, courseCode: string, class
         throw new Error("You are already enrolled in this class.");
     }
 
-    // create
-    await prisma.enrollment.create({
-        data: {
-        studentId,
-        classId: cls.id,
-        },
-    });
+    // create enrollment and set institution on first enroll
+    await prisma.$transaction([
+        prisma.enrollment.create({
+            data: { studentId, classId: cls.id },
+        }),
+        ...(!student?.institution ? [
+            prisma.user.update({
+                where: { id: studentId },
+                data: { institution: course.institution },
+            }),
+        ] : []),
+    ]);
 
     return { classId: cls.id };
 }

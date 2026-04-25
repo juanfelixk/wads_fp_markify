@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Home, PlusCircle, Calendar, LogOut, Menu } from "lucide-react";
+import { Home, PlusCircle, Calendar, LogOut, Menu, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,10 +12,27 @@ import { getAvatarUrl } from "@/lib/avatar";
 import { authClient } from "@/services/auth/client";
 import { toast } from "sonner";
 
-export default function Navbar({ userName }: { userName: string }) {
+const studentNavItems = [
+    { label: "Home", icon: Home, href: "/dashboard/student" },
+    { label: "Enroll", icon: PlusCircle, href: "/dashboard/student/enroll" },
+    { label: "Calendar", icon: Calendar, href: "/dashboard/student/calendar" },
+];
+
+const lecturerNavItems = [
+    { label: "Home", icon: Home, href: "/dashboard/lecturer" },
+    
+];
+
+const adminNavItems = [
+    { label: "Home", icon: Home, href: "/dashboard/admin" },
+    { label: "Register Lecturer", icon: PlusCircle, href: "/dashboard/admin/register-lecturer"}
+];
+
+export default function Navbar({ userName, role }: { userName: string; role: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const [loading, setLoading] = useState(false);
+    let navItems;
 
     const handleLogout = async () => {
         setLoading(true);
@@ -24,11 +41,13 @@ export default function Navbar({ userName }: { userName: string }) {
         toast.success("Successfully logged out.");
     };
 
-    const navItems = [
-        { label: "Home", icon: Home, href: "/dashboard/student" },
-        { label: "Enroll", icon: PlusCircle, href: "/dashboard/student/enroll" },
-        { label: "Calendar", icon: Calendar, href: "/dashboard/student/calendar" },
-    ];
+    if (role === "STUDENT") {
+        navItems = studentNavItems;
+    } else if (role === "LECTURER") {
+        navItems= lecturerNavItems;
+    } else {
+        navItems = adminNavItems;
+    }
 
     return (
         <header className="sticky top-0 z-20 h-17 border-b border-foreground/25 bg-background">

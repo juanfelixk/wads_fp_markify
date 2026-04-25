@@ -15,7 +15,7 @@ export default function StudentDashboardPage() {
     const [loading, setLoading] = useState(true);
     const { data: session } = authClient.useSession();
     const userName = session?.user?.name ?? "Student";
-    const institution = classes[0]?.institution ?? "Your Institution";
+    const institution = session?.user?.institution ?? "Your Institution";
 
     useEffect(() => {
         fetchEnrolledClasses()

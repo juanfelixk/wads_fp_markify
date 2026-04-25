@@ -81,8 +81,8 @@ export default function ProfilePage() {
 
     return (
         <div className={hasPassword
-            ? "flex flex-col items-center justify-center min-h-[calc(100vh-9rem)] px-4"
-            : "flex flex-col items-center justify-center min-h-[calc(100vh-13rem)] px-4"
+            ? "flex flex-col items-center justify-center min-h-[calc(100vh-9rem)] px-4 py-12"
+            : "flex flex-col items-center justify-center min-h-[calc(100vh-13rem)] px-4 py-12"
         }>
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="w-full max-w-lg space-y-4">
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4">

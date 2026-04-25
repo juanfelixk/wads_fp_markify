@@ -22,24 +22,6 @@ enum SubmissionStatus {
   TO_BE_REVIEWED
 }
 
-enum UserStatus { // to distinguish activated accounts for lecturers
-  PENDING
-  ACTIVE
-}
-
-model LecturerInvitation {
-  id        String   @id @default(cuid())
-  email     String   @unique  // one pending invite per email
-  token     String   @unique  // the secret token sent in the email link
-  invitedBy String // admin's userId
-  admin     User     @relation("AdminInvitations", fields: [invitedBy], references: [id])
-  expiresAt DateTime
-  usedAt    DateTime? // null = not yet activated
-  createdAt DateTime @default(now())
-
-  @@index([token])
-}
-
 model User {
   id              String   @id @default(cuid())
   name            String?
@@ -49,14 +31,13 @@ model User {
   role            Role     @default(STUDENT)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  status UserStatus @default(ACTIVE) // existing users are ACTIVE, new lecturer invites start as PENDING
+  institution String?
 
   accounts        Account[]
   sessions        Session[]
   lecturerClasses Class[]      @relation("LecturerClasses")
   enrollments     Enrollment[] @relation("StudentEnrollments")
   submissions     Submission[] @relation("StudentSubmissions")
-  invitationsSent LecturerInvitation[] @relation("AdminInvitations")
 }
 
 model Session {

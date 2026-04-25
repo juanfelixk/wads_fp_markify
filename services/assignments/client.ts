@@ -3,7 +3,7 @@ import { ClassDetail } from "@/services/classes/types";
 import type { AssignmentPageData } from "./types";
  
 export async function fetchClassDetail(classId: string): Promise<ClassDetail> {
-    const res = await fetch(`/api/v1/classes/${classId}/assignments`);
+    const res = await fetch(`/api/v1/class/${classId}/assignment`);
     const json = await res.json();
     if (!res.ok) throw new Error(json.error ?? "Failed to fetch class detail.");
     return json.data;
@@ -17,7 +17,7 @@ export async function fetchCalendarAssignments(): Promise<CalendarAssignment[]> 
 }
 
 export async function fetchAssignmentPageData(classId: string, assignmentId: string): Promise<AssignmentPageData> {
-    const res = await fetch(`/api/v1/classes/${classId}/assignments/${assignmentId}`, {
+    const res = await fetch(`/api/v1/class/${classId}/assignment/${assignmentId}`, {
         cache: "no-store",
     });
     const json = await res.json();
