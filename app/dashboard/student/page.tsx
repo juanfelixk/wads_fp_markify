@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import ClassCard from "@/components/dashboard/class-card";
+import ClassCard from "@/components/dashboard/student-class-card";
 import { ClassSummary } from "@/services/classes/types";
 import { fetchEnrolledClasses, dropClass } from "@/services/classes/client";
 import { toast } from "sonner";

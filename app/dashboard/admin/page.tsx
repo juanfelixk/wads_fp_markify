@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { authClient } from "@/services/auth/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { Eye, GraduationCap, UsersRound } from "lucide-react";

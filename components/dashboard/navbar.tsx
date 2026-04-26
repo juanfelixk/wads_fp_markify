@@ -20,7 +20,7 @@ const studentNavItems = [
 
 const lecturerNavItems = [
     { label: "Home", icon: Home, href: "/dashboard/lecturer" },
-    
+    { label: "Create Class", icon: PlusCircle, href: "/dashboard/lecturer/create-new-class"},
 ];
 
 const adminNavItems = [

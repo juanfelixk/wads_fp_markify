@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 type SessionData = typeof auth.$Infer.Session;
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     if (pathname === "/") {

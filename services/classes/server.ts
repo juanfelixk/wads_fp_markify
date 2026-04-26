@@ -1,20 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 
-export async function getLecturerClasses(lecturerId: string) {
-    return prisma.class.findMany({
-        where: { lecturerId },
-        select: {
-            id: true,
-            code: true,
-            academicYear: true,
-            course: { select: { code: true, name: true } },
-            _count: { select: { enrollments: true } },
-        },
-        orderBy: { createdAt: "desc" },
-    });
-}
-
+// student-side
 export async function getEnrolledClasses(studentId: string) {
     const enrollments = await prisma.enrollment.findMany({
         where: { studentId },
@@ -42,6 +29,7 @@ export async function getEnrolledClasses(studentId: string) {
     }));
 }
 
+// student-side
 export async function unenrollStudent(studentId: string, classId: string) {
     await prisma.enrollment.delete({
         where: {
@@ -50,6 +38,7 @@ export async function unenrollStudent(studentId: string, classId: string) {
     });
 }
 
+// student-side
 export async function enrollStudent(studentId: string, courseCode: string, classCode: string, academicYear: string, enrollmentKey: string) {
     const normalizedCourseCode = courseCode.trim().toUpperCase();
     const normalizedClassCode = classCode.trim().toUpperCase();
@@ -117,4 +106,32 @@ export async function enrollStudent(studentId: string, courseCode: string, class
     ]);
 
     return { classId: cls.id };
+}
+
+// lecturer-side
+export async function getLecturerClasses(lecturerId: string) {
+    return prisma.class.findMany({
+        where: { lecturerId },
+        select: {
+            id: true,
+            code: true,
+            academicYear: true,
+            course: { select: { code: true, name: true } },
+            _count: { select: { enrollments: true } },
+        },
+        orderBy: { course: { name: "asc" } },
+    });
+}
+
+// lecturer-side
+export async function deleteClass(classId: string, lecturerId: string) {
+    // verify ownership before deleting
+    const cls = await prisma.class.findFirst({
+        where: { id: classId, lecturerId },
+        select: { id: true },
+    });
+ 
+    if (!cls) return null;
+ 
+    return prisma.class.delete({ where: { id: classId } });
 }

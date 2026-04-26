@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, ShieldCheck } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { authClient } from "@/services/auth/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -23,6 +24,7 @@ export default function RegisterPage() {
     const [classCode, setClassCode] = useState("");
     const [academicYear, setAcademicYear] = useState("");
     const [enrollmentKey, setEnrollmentKey] = useState("");
+    const [showLearnMore, setShowLearnMore] = useState(false);
 
     const validate = (): string | null => {
         const trimmedName = name.trim();
@@ -95,8 +97,8 @@ export default function RegisterPage() {
                         Create a Student Account
                     </h2>
                     <p className="text-sm text-muted-foreground gap-1 flex">
-                        <span>Signing up as a Lecturer?</span>
-                        <a className="text-primary hover:underline cursor-pointer" href="#">Learn more</a>
+                        <span>Signing up as a Lecturer or Admin?</span>
+                        <a className="text-primary hover:underline cursor-pointer" onClick={() => setShowLearnMore(true)}>Learn more</a>
                     </p>
                 </div>
 
@@ -171,6 +173,35 @@ export default function RegisterPage() {
                     <a className="text-primary hover:underline cursor-pointer" href="/auth/login">Log in</a>
                 </div>
             </div>
+
+            {/* learn more modal */}
+            <Dialog open={showLearnMore} onOpenChange={setShowLearnMore}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Signing up as a Lecturer or Admin</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-2">
+                        <div className="flex items-start gap-3 border border-border rounded-lg p-4">
+                            <GraduationCap className="w-7 h-7 text-primary shrink-0 my-auto mx-2.5" />
+                            <div className="space-y-1">
+                                <p className="font-semibold text-foreground text-base">Lecturer</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Lecturer accounts are created by your institution's admin. You will receive your login credentials directly from them.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 border border-border rounded-lg p-4">
+                            <ShieldCheck className="w-7 h-7 text-primary shrink-0 my-auto mx-2.5" />
+                            <div className="space-y-1">
+                                <p className="font-semibold text-foreground text-base">Admin</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Admin accounts are set up by the Markify team during institution onboarding. Please contact us if your institution is not yet registered.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
