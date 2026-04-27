@@ -22,3 +22,20 @@ export interface StudentEnrollment {
     lecturer: string;
     students: number;
 }
+
+export interface CourseSummary {
+    id: string;
+    code: string;
+    name: string;
+    institution: string;
+    createdAt: string;
+    _count: { classes: number };
+}
+ 
+export interface CourseClass {
+    id: string;
+    code: string;
+    academicYear: string;
+    lecturer: { name: string | null; email: string };
+    _count: { enrollments: number };
+}

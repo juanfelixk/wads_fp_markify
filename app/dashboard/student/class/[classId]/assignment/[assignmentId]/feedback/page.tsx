@@ -102,7 +102,7 @@ function ScoresCard({ data, aiTimedOut }: { data: FeedbackPageData, aiTimedOut?:
                                         This AI-generated score is an estimate based on the rubric and may be inaccurate. It does not represent your final grade. Use this for revision purposes only.
                                     </TooltipContent>
                                 </Tooltip>
-                                </TooltipProvider>
+                            </TooltipProvider>
                         </span>
                         {data.aiScore != null
                         ? <span className="text-sm font-semibold tabular-nums">{data.aiScore}<span className="text-muted-foreground font-normal"> / {data.maxPoints ?? "—"}</span></span>

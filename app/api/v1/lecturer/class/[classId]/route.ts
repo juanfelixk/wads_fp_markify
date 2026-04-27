@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/services/auth/server";
 import { deleteClass } from "@/services/classes/server";
  
-export async function DELETE(_req: NextRequest, { params }: { params: { classId: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ classId: string }> }) {
     const session = await getSession();
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const deleted = await deleteClass(params.classId, session.user.id);
+    const { classId } = await params;
+    const deleted = await deleteClass(classId, session.user.id);
 
     if (!deleted) {
         return NextResponse.json(

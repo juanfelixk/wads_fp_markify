@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/services/auth/client";
+import { motion } from "framer-motion";
 
 export default function RegisterLecturerPage() {
     const router = useRouter();
@@ -41,16 +42,16 @@ export default function RegisterLecturerPage() {
 
     return (
         <div className="min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center px-4">
-            <div className="w-full max-w-lg space-y-4">
-                <div className="mb-4">
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="w-full max-w-lg space-y-4 -translate-y-10">
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4">
                     <h1 className="text-2xl font-semibold tracking-tight">Register a new lecturer</h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         The new lecturer's account will be created with this default password. Please share this with them so they can log in and change it. <br />
                         <span className="font-mono font-medium text-foreground">{defaultPassword}</span>
                     </p>
-                </div>
+                </motion.div>
 
-                <div className="border border-border rounded-lg p-6 space-y-4 bg-card">
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} className="border border-border rounded-lg p-6 space-y-4 bg-card">
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-foreground select-none">Email</label>
                         <Input type="text" placeholder="e.g. lecturer@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} className="h-10" />
@@ -62,11 +63,11 @@ export default function RegisterLecturerPage() {
                             Include title(s) when neccesary.
                         </p>
                     </div>
-                    <Button className="w-full h-10 cursor-pointer" onClick={handleSubmit} disabled={ loading || !email || !name }>
-                        {loading ? "Register..." : "Register"}
+                    <Button className="w-full h-10 cursor-pointer" onClick={handleSubmit} disabled={loading || !email || !name}>
+                        {loading ? "Registering..." : "Register Lecturer"}
                     </Button>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     );
 }

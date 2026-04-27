@@ -17,12 +17,12 @@ export default function ClassCard({ cls, onView, onDelete }: ClassCardProps) {
     const color = getAccentColor(cls.classId);
 
     return (
-        <Card className="group relative overflow-hidden hover:shadow-md transition-shadow duration-200 pt-0">
+        <Card className="group relative overflow-hidden hover:shadow-md transition-shadow duration-200 pt-0 h-full flex flex-col">
             <div className="h-2 w-full" style={{ backgroundColor: `hsl(${color})` }} />
 
             <CardHeader className="pt-2">
                 <span className="inline-block text-xs font-mono font-medium px-2 py-0.5 rounded mb-2 w-fit bg-secondary text-secondary-foreground">
-                    {cls.courseCode} — {cls.classCode}
+                    {cls.courseCode} - {cls.classCode}
                 </span>
                 <CardTitle className="text-lg leading-snug font-bold">
                     <h2>{cls.courseName}</h2>
@@ -43,7 +43,7 @@ export default function ClassCard({ cls, onView, onDelete }: ClassCardProps) {
                 </div>
             </CardContent>
 
-            <CardFooter className="gap-2 pt-3 border-t border-border">
+            <CardFooter className="gap-2 pt-3 border-t border-border mt-auto">
                 <Button variant="default" size="sm" className="flex-1 gap-1.5 cursor-pointer" onClick={onView}>
                     <Eye className="w-3.5 h-3.5" />
                     View Class

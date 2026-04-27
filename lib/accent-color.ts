@@ -7,21 +7,15 @@ const ACCENT_COLORS = [
     "185 50% 32%", "355 50% 38%", "210 55% 38%", "120 40% 30%",
 ];
 
-const assignedColors = new Map<string, string>();
-let availableColors = [...ACCENT_COLORS];
-
-export function getAccentColor(courseId: string): string {
-    // return existing color
-    if (assignedColors.has(courseId)) {
-        return assignedColors.get(courseId)!;
+function hashString(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
     }
+    return Math.abs(hash);
+}
 
-    // if all colors used then reset pool
-    if (availableColors.length === 0) {
-        availableColors = [...ACCENT_COLORS];
-    }
-    // assign next available color
-    const color = availableColors.shift()!;
-    assignedColors.set(courseId, color);
-    return color;
+export function getAccentColor(key: string): string {
+    const index = hashString(key) % ACCENT_COLORS.length;
+    return ACCENT_COLORS[index];
 }

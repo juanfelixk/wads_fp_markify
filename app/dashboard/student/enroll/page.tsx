@@ -62,7 +62,7 @@ export default function EnrollPage() {
                         <Input type="text" placeholder="e.g. 2024/2025" value={academicYear} onChange={(e) => setAcademicYear(e.target.value)} disabled={loading} className="h-10" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-foreground select-none">Enrollment Key</label>
+                        <label className="text-sm font-medium text-foreground select-none">Enrollment Key <span className="text-muted-foreground">(case sensitive)</span></label>
                         <Input type="text" placeholder="Provided by your lecturer" value={enrollmentKey} onChange={(e) => setEnrollmentKey(e.target.value)} disabled={loading} className="h-10" />
                     </div>
                     <Button className="w-full h-10 cursor-pointer" onClick={handleSubmit} disabled={loading || !courseCode || !classCode || !academicYear || !enrollmentKey}>

@@ -9,6 +9,7 @@ export interface ClassSummary {
     academicYear: string;
     lecturer: string;
     students: number;
+    enrollmentKey: string;
 }
 
 export interface ClassDetail {

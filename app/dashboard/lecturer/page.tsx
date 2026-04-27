@@ -1,7 +1,7 @@
 "use client";
 
 import { authClient } from "@/services/auth/client";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { ClassSummary } from "@/services/classes/types";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ export default function LecturerDashboardPage() {
     const [classes, setClasses] = useState<ClassSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [query, setQuery] = useState("");
+    const isSearching = query.trim().length > 0;
     const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -48,12 +49,12 @@ export default function LecturerDashboardPage() {
  
         try {
             await deleteOwnedClass(cls.classId);
-            toast.success(`"${cls.courseName} – ${cls.classCode}" has been removed.`);
+            toast.success(`"${cls.courseName} - ${cls.classCode}" has been removed.`);
         } catch {
             setClasses((prev) =>
                 [...prev, cls].sort((a, b) => a.courseName.localeCompare(b.courseName))
             );
-            toast.error(`Failed to delete "${cls.courseName} – ${cls.classCode}". Please try again.`);
+            toast.error(`Failed to delete "${cls.courseName} - ${cls.classCode}". Please try again.`);
         } finally {
             setDeletingIds((prev) => {
                 const next = new Set(prev);
@@ -80,9 +81,9 @@ export default function LecturerDashboardPage() {
 
             {/* toolbar */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} className="mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                <div className="relative flex-1 max-w-xl">
+                <div className="relative flex-1 min-w-10/12 sm:min-w-0 sm:max-w-xl">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by course code, course name, class code, or academic year" className="pl-9 bg-foreground/7 text-muted-foreground" />
+                    <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by course, class, or academic year" className="pl-9 bg-foreground/7 text-muted-foreground" />
                 </div>
             </motion.div>
 
@@ -90,8 +91,8 @@ export default function LecturerDashboardPage() {
             <div className="space-y-3">
                 {loading && (
                     <>
-                        {[...Array(4)].map((_, i) => (
-                            <Skeleton key={i} className="h-[76px] w-full rounded-lg" />
+                        {[...Array(3)].map((_, i) => (
+                            <Skeleton key={i} className="h-[125px] w-full rounded-lg" />
                         ))}
                     </>
                 )}
@@ -102,10 +103,23 @@ export default function LecturerDashboardPage() {
                     </div>
                 )}
  
-                {!loading &&
-                    filtered.map((cls, i) => (
-                        <LecturerClassCard key={cls.classId} cls={cls} index={i} onDelete={handleDelete} deleting={deletingIds.has(cls.classId)} />
-                    ))}
+                {!loading && (
+                    isSearching ? (
+                        filtered.map((cls) => (
+                            <div key={cls.classId}>
+                                <LecturerClassCard cls={cls} onDelete={handleDelete} deleting={deletingIds.has(cls.classId)} />
+                            </div>
+                        ))
+                    ) : (
+                        <AnimatePresence>
+                            {filtered.map((cls, i) => (
+                                <motion.div key={cls.classId} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.4, delay: i * 0.06 }}>
+                                    <LecturerClassCard cls={cls} index={i} onDelete={handleDelete} deleting={deletingIds.has(cls.classId)} />
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    )
+                    )}
             </div>
         </div>
     );

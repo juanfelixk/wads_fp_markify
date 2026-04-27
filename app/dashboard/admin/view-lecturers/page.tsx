@@ -13,7 +13,7 @@ import { fetchAllLecturers } from "@/services/admin/client";
 import { authClient } from "@/services/auth/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { fetchLecturerClasses } from "@/services/classes/client";
+import { fetchLecturerClasses } from "@/services/admin/client";
 import { LecturerOrStudent, LecturerClass } from "@/services/admin/types";
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -62,7 +62,7 @@ export default function ViewLecturersPage() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
             {/* header */}
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-8">
                 <Button variant="ghost" size="lg" className="gap-2 cursor-pointer hover:bg-foreground/10 text-muted-foreground mb-4" onClick={() => router.push("/dashboard/admin")}>
@@ -172,9 +172,9 @@ export default function ViewLecturersPage() {
 
             {/* modal */}
             <Dialog open={!!selectedLecturer} onOpenChange={(open) => { if (!open) setSelectedLecturer(null); }}>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-sm sm:max-w-xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
+                        <DialogTitle className="text-left gap-2">
                             Classes of {selectedLecturer?.name ?? "Lecturer"}
                         </DialogTitle>
                         <span className="flex items-center text-sm text-muted-foreground gap-2">

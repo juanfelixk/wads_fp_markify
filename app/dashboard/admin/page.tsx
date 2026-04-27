@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { authClient } from "@/services/auth/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Eye, GraduationCap, UsersRound } from "lucide-react";
+import { Eye, GraduationCap, LibraryBig, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboardPage() {
@@ -30,10 +30,18 @@ export default function AdminDashboardPage() {
             href: "/dashboard/admin/view-students",
             Icon: UsersRound,
         },
+        {
+            key: "courses",
+            title: "View all courses",
+            description: `View all courses registered on Markify in ${institution}.`,
+            label: "View Courses",
+            href: "/dashboard/admin/view-courses",
+            Icon: LibraryBig,
+        },
     ];
 
     return (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-8">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
                     Institution
@@ -42,11 +50,11 @@ export default function AdminDashboardPage() {
                     {institution}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Welcome back, <span className="font-medium text-foreground">{userName}</span>.
+                    Welcome back, <span className="font-medium text-foreground">Admin {userName}</span>.
                 </p>
             </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <AnimatePresence>
                     {cards.map((card, i) => (
                         <motion.div key={card.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.3, delay: i * 0.06 }}>

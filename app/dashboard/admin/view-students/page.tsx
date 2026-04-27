@@ -13,7 +13,7 @@ import { fetchAllStudents } from "@/services/admin/client";
 import { authClient } from "@/services/auth/client";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { fetchStudentEnrollments } from "@/services/classes/client";
+import { fetchStudentEnrollments } from "@/services/admin/client";
 import { LecturerOrStudent, StudentEnrollment } from "@/services/admin/types";
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -172,9 +172,9 @@ export default function ViewStudentsPage() {
 
             {/* modal */}
             <Dialog open={!!selectedStudent} onOpenChange={(open) => { if (!open) setSelectedStudent(null); }}>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-w-sm sm:max-w-xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
+                        <DialogTitle className="flex items-center text-left gap-2">
                             Enrollments of {selectedStudent?.name ?? "Student"}
                         </DialogTitle>
                         <span className="flex items-center text-sm text-muted-foreground gap-2">

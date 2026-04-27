@@ -25,7 +25,8 @@ const lecturerNavItems = [
 
 const adminNavItems = [
     { label: "Home", icon: Home, href: "/dashboard/admin" },
-    { label: "Register Lecturer", icon: PlusCircle, href: "/dashboard/admin/register-lecturer"}
+    { label: "Register Lecturer", icon: PlusCircle, href: "/dashboard/admin/register-lecturer"},
+    { label: "Register Course", icon: PlusCircle, href: "/dashboard/admin/register-course"}
 ];
 
 export default function Navbar({ userName, role }: { userName: string; role: string }) {

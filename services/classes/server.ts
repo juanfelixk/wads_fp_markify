@@ -43,7 +43,7 @@ export async function enrollStudent(studentId: string, courseCode: string, class
     const normalizedCourseCode = courseCode.trim().toUpperCase();
     const normalizedClassCode = classCode.trim().toUpperCase();
     const normalizedYear = academicYear.trim();
-    const normalizedKey = enrollmentKey.trim().toLowerCase();
+    const normalizedKey = enrollmentKey.trim();
 
     // check empty fields
     if (!normalizedCourseCode || !normalizedClassCode || !normalizedYear || !normalizedKey) {
@@ -116,10 +116,15 @@ export async function getLecturerClasses(lecturerId: string) {
             id: true,
             code: true,
             academicYear: true,
+            enrollmentKey: true,
             course: { select: { code: true, name: true } },
             _count: { select: { enrollments: true } },
         },
-        orderBy: { course: { name: "asc" } },
+        orderBy: [
+            { course: { name: "asc" } },
+            { academicYear: "desc" },
+            { code: "asc" }
+        ]
     });
 }
 
