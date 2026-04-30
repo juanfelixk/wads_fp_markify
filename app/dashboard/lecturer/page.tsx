@@ -65,7 +65,7 @@ export default function LecturerDashboardPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
             {/* header */}
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-8">
                 <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">

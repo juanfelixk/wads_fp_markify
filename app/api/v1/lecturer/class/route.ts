@@ -6,7 +6,7 @@ import { createClass, generateUniqueEnrollmentKey } from "@/services/lecturer/se
 
 export async function GET() {
     const session = await getSession();
-    if (!session) {
+    if (!session || session.user.role !== "LECTURER") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     const session = await getSession();
-    if (!session) {
+    if (!session || session.user.role !== "LECTURER") {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

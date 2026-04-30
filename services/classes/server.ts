@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { LecturerAssignment, LecturerClassPageData } from "./types";
 
 // student-side
 export async function getEnrolledClasses(studentId: string) {
@@ -139,4 +140,44 @@ export async function deleteClass(classId: string, lecturerId: string) {
     if (!cls) return null;
  
     return prisma.class.delete({ where: { id: classId } });
+}
+
+// lecturer-side
+export async function getLecturerClassPageData(classId: string, lecturerId: string): Promise<LecturerClassPageData | null> {
+    const cls = await prisma.class.findFirst({
+        where: { id: classId, lecturerId },
+        include: {
+            course: true,
+            enrollments: { select: { id: true } },
+            assignments: {
+                include: {
+                    submissions: {
+                        select: { id: true, status: true },
+                    },
+                },
+                orderBy: { startDate: "desc" },
+            },
+        },
+    });
+ 
+    if (!cls) return null;
+ 
+    const assignments: LecturerAssignment[] = cls.assignments.map((a) => ({
+        id: a.id,
+        title: a.title,
+        startDate: a.startDate.toISOString(),
+        endDate: a.endDate.toISOString(),
+        submissions: a.submissions.length,
+        graded: a.submissions.filter((s) => s.status === "GRADED").length,
+    }));
+ 
+    return {
+        classId: cls.id,
+        courseCode: cls.course.code,
+        courseName: cls.course.name,
+        classCode: cls.code,
+        academicYear: cls.academicYear,
+        students: cls.enrollments.length,
+        assignments,
+    };
 }

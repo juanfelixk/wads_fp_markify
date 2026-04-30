@@ -61,3 +61,22 @@ export interface AssignmentPageData {
 
     role: "STUDENT" | "LECTURER";
 }
+
+// lecturer-side
+export interface CreateAssignmentPayload {
+    title: string;
+    instructions?: string;
+    maxPoints?: number;
+    lateAllowed?: boolean;
+    startDate: string;
+    endDate: string;
+    rubric?: RubricCriterion[];
+}
+
+// lecturer-side
+export interface CreatedAssignment {
+    id: string;
+    title: string;
+    startDate: string;
+    endDate: string;
+}

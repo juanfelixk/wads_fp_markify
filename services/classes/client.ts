@@ -1,4 +1,4 @@
-import { ClassSummary } from "./types";
+import { ClassSummary, LecturerClassPageData } from "./types";
 
 // student-side
 export async function fetchEnrolledClasses(): Promise<ClassSummary[]> {
@@ -40,4 +40,14 @@ export async function deleteOwnedClass(classId: string): Promise<void> {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error ?? "Failed to delete class.");
     }
+}
+
+// lecturer-side
+export async function fetchLecturerClassPageData(classId: string): Promise<LecturerClassPageData> {
+    const res = await fetch(`/api/v1/lecturer/class/${classId}`, {
+        cache: "no-store",
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error ?? "Failed to fetch class data.");
+    return json.data;
 }

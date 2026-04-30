@@ -22,3 +22,22 @@ export interface ClassDetail {
     institution: string;
     assignments: Assignment[];
 }
+
+export interface LecturerAssignment {
+    id: string;
+    title: string;
+    startDate: string;
+    endDate: string;
+    submissions: number;
+    graded: number;
+}
+ 
+export interface LecturerClassPageData {
+    classId: string;
+    courseCode: string;
+    courseName: string;
+    classCode: string;
+    academicYear: string;
+    students: number;
+    assignments: LecturerAssignment[];
+}

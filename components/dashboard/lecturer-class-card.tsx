@@ -71,7 +71,7 @@ export function LecturerClassCard({ cls, onDelete, deleting = false }: LecturerC
 
                         {/* actions */}
                         <div className="flex items-center gap-2 sm:shrink-0 self-end sm:self-auto mt-6 sm:mt-0">
-                            <Link href={`/course/${cls.classId}`} className="flex-1 sm:flex-none">
+                            <Link href={`/dashboard/lecturer/class/${cls.classId}`} className="flex-1 sm:flex-none">
                                 <Button variant="default" size="sm" className="w-50 sm:w-full gap-1.5 cursor-pointer">
                                     <Eye className="w-3.5 h-3.5" />
                                     View Class
@@ -90,7 +90,7 @@ export function LecturerClassCard({ cls, onDelete, deleting = false }: LecturerC
                                             <AlertDialogHeader className="select-none">
                                                 <AlertDialogTitle>Delete Class</AlertDialogTitle>
                                                 <AlertDialogDescription className="my-2">
-                                                    Are you sure you want to delete class <span className="font-medium text-foreground">{cls.classCode} {cls.courseName} ({cls.academicYear})</span>? This action cannot be undone.
+                                                    Are you sure you want to delete class <span className="font-medium text-foreground">{cls.classCode} {cls.courseName} ({cls.academicYear})</span>? All data related to this class will be deleted. This action cannot be undone.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
