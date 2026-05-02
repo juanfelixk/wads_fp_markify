@@ -40,4 +40,5 @@ export interface LecturerClassPageData {
     academicYear: string;
     students: number;
     assignments: LecturerAssignment[];
+    enrollmentKey: string;
 }

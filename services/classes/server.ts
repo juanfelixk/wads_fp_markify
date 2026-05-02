@@ -179,5 +179,6 @@ export async function getLecturerClassPageData(classId: string, lecturerId: stri
         academicYear: cls.academicYear,
         students: cls.enrollments.length,
         assignments,
+        enrollmentKey: cls.enrollmentKey,
     };
 }

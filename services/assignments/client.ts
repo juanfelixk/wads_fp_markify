@@ -1,6 +1,6 @@
 import { CalendarAssignment } from "./types";
 import { ClassDetail } from "@/services/classes/types";
-import type { AssignmentPageData, CreateAssignmentPayload, CreatedAssignment } from "./types";
+import type { AssignmentPageData, CreateAssignmentPayload, CreatedAssignment, LecturerAssignmentPageData } from "./types";
  
 export async function fetchClassDetail(classId: string): Promise<ClassDetail> {
     const res = await fetch(`/api/v1/student/class/${classId}/assignment`);
@@ -58,4 +58,11 @@ export async function updateAssignment(classId: string, assignmentId: string, bo
         body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error("Failed to update assignment");
+}
+
+// lecturer-side
+export async function fetchLecturerAssignmentPageData(classId: string, assignmentId: string): Promise<LecturerAssignmentPageData> {
+    const res = await fetch(`/api/v1/lecturer/class/${classId}/assignment/${assignmentId}`);
+    if (!res.ok) throw new Error("Failed to fetch assignment");
+    return res.json();
 }

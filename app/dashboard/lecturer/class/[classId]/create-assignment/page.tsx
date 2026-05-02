@@ -368,9 +368,9 @@ export default function CreateAssignmentPage() {
                         {loading ? (
                             <>
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                (isEditing ? "Saving..." : "Creating...")
+                                {isEditing ? "Saving..." : "Creating..."}
                             </>
-                        ) : (isEditing ? "Save Changes" : "Create Assignment")}
+                        ) : isEditing ? "Save Changes" : "Create Assignment"}
                     </Button>
                 </motion.div>
             </motion.div>

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "../auth/server";
-import type { AssignmentPageData, RubricCriterion, CalendarAssignment, CreateAssignmentPayload, CreatedAssignment } from "./types";
+import type { AssignmentPageData, RubricCriterion, CalendarAssignment, CreateAssignmentPayload, CreatedAssignment, LecturerAssignmentSubmission } from "./types";
 import { getStudentSubmission } from "../submissions/server";
 import { Prisma, SubmissionStatus } from "@/generated/prisma";
 
@@ -257,4 +257,74 @@ export async function updateAssignmentById(assignmentId: string, data: CreateAss
             rubric: (data.rubric ?? []) as unknown as Prisma.InputJsonValue,
         },
     });
+}
+
+const statusOrder: Record<string, number> = {
+    TO_BE_REVIEWED: 0,
+    REVISED: 1,
+    SUBMITTED: 2,
+    SUBMITTED_LATE: 3,
+    NOT_SUBMITTED: 4,
+    GRADED: 5,
+};
+
+// lecturer-side
+export async function getLecturerAssignmentPageData(classId: string, assignmentId: string) {
+    const assignment = await prisma.assignment.findUnique({
+        where: { id: assignmentId },
+        include: {
+            class: {
+                include: {
+                    course: true,
+                    enrollments: {
+                        include: { student: true },
+                    },
+                },
+            },
+            submissions: {
+                include: { student: true },
+            },
+        },
+    });
+
+    if (!assignment || assignment.classId !== classId) return null;
+
+    const { class: cls, submissions } = assignment;
+
+    const submissionMap = new Map(submissions.map((s) => [s.studentId, s]));
+
+    const allSubmissions: LecturerAssignmentSubmission[] = cls.enrollments.map((e) => {
+        const sub = submissionMap.get(e.studentId);
+        return {
+            id: sub?.id ?? `nosub-${e.studentId}`,
+            studentId: e.studentId,
+            studentName: e.student.name ?? "Unknown",
+            email: e.student.email,
+            status: sub?.status ?? "NOT_SUBMITTED",
+            fileUrl: sub?.fileUrl ?? undefined,
+            fileName: sub?.fileName ?? undefined,
+            fileSize: sub?.fileSize ?? undefined,
+            finalScore: sub?.finalScore ?? undefined,
+            submittedAt: sub?.submittedAt?.toISOString() ?? undefined,
+        };
+    });
+
+    allSubmissions.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+    return {
+        id: assignment.id,
+        title: assignment.title,
+        instructions: assignment.instructions ?? undefined,
+        maxPoints: assignment.maxPoints ?? undefined,
+        lateAllowed: assignment.lateAllowed ?? false,
+        startDate: assignment.startDate.toISOString(),
+        endDate: assignment.endDate.toISOString(),
+        rubric: (assignment.rubric ?? []) as unknown as RubricCriterion[],
+        courseCode: cls.course.code,
+        courseName: cls.course.name,
+        classCode: cls.code,
+        academicYear: cls.academicYear,
+        submissions: allSubmissions,
+        role: "LECTURER",
+    };
 }

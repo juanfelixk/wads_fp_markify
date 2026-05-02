@@ -19,7 +19,7 @@ interface RubricDialogProps {
 export default function RubricDialog({ open, onOpenChange, title, rubric, totalPoints, scores, status, role }: RubricDialogProps) {
     if (!rubric || rubric.length === 0) return null;
 
-    const visible = (role === "LECTURER") || (status === "GRADED");
+    const visible = (role === "STUDENT") && (status === "GRADED");
 
     function getScore(name: string) {
         return scores?.find((s) => s.criterionName === name);
@@ -57,15 +57,19 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                                     </div>
 
                                     {/* RIGHT: score box */}
-                                        <div className="flex items-center justify-center min-w-[70px] px-3 rounded-lg border bg-background">
-                                        {score && visible ? (
-                                            <span className="text-base font-bold text-primary tabular-nums">
-                                            {score.pointsAwarded}
-                                            </span>
+                                        {role === "STUDENT" ? (
+                                            <div className="flex items-center justify-center min-w-[70px] px-3 rounded-lg border bg-background">
+                                                {score && visible ? (
+                                                    <span className="text-base font-bold text-primary tabular-nums">
+                                                    {score.pointsAwarded}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-xs text-muted-foreground">—</span>
+                                                )}
+                                            </div>
                                         ) : (
-                                            <span className="text-xs text-muted-foreground">—</span>
+                                            <></>
                                         )}
-                                    </div>
                                 </div>
                             );
                         })}
@@ -80,10 +84,12 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                             {(scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? "-")} / {totalPoints}
                             </span>
                         </div>
-                        ) : (
+                        ) : role === "STUDENT" ? (
                             <div className="text-xs text-muted-foreground text-right italic">
                                 Pending lecturer review...
                             </div>
+                        ) : (
+                            <></>
                         )}
                 </div>
             </DialogContent>

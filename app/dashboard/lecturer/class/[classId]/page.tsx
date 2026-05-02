@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Eye, Users, Clock, Plus, FileText, Loader2, Trash2, Pencil } from "lucide-react";
+import { ArrowLeft, Eye, Users, Clock, Plus, FileText, Loader2, Trash2, Pencil, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,7 +99,7 @@ export default function LecturerClassPage() {
         );
     }
 
-    const { courseCode, courseName, classCode, academicYear, students, assignments } = pageData;
+    const { courseCode, courseName, classCode, academicYear, students, assignments, enrollmentKey } = pageData;
     const color = getAccentColor(`${courseCode}-${academicYear}`);
 
     return (
@@ -133,6 +133,10 @@ export default function LecturerClassPage() {
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5" /> {enrollmentKey}
+                    </span>
+                    <span className="text-muted-foreground text-xs">·</span>
                     <span className="flex items-center gap-1.5">
                         <Users className="w-4 h-4" /> {students} students
                     </span>

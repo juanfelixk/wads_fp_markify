@@ -1,4 +1,4 @@
-import { deleteAssignmentById, getAssignmentById, updateAssignmentById } from "@/services/assignments/server";
+import { deleteAssignmentById, getLecturerAssignmentPageData, updateAssignmentById } from "@/services/assignments/server";
 import { getSession } from "@/services/auth/server";
 import { NextResponse } from "next/server";
 
@@ -18,14 +18,14 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ assig
     }
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ assignmentId: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ classId: string, assignmentId: string }> }) {
     const session = await getSession();
     if (!session || session.user.role !== "LECTURER")
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { assignmentId } = await params;
+    const { classId, assignmentId } = await params;
     try {
-        const assignment = await getAssignmentById(assignmentId);
+        const assignment = await getLecturerAssignmentPageData(classId, assignmentId);
         if (!assignment) return NextResponse.json({ error: "Not found" }, { status: 404 });
         return NextResponse.json(assignment);
     } catch {

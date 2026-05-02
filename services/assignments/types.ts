@@ -80,3 +80,35 @@ export interface CreatedAssignment {
     startDate: string;
     endDate: string;
 }
+
+// lecturer-side
+export interface LecturerAssignmentSubmission {
+    id: string;
+    studentId: string;
+    studentName: string;
+    email: string;
+    status: AssignmentStatus;
+    fileUrl?: string;
+    fileName?: string;
+    fileSize?: number;
+    finalScore?: number;
+    submittedAt?: string;
+}
+
+// lecturer-side
+export interface LecturerAssignmentPageData {
+    id: string;
+    title: string;
+    instructions?: string;
+    maxPoints?: number;
+    lateAllowed?: boolean;
+    startDate: string;
+    endDate: string;
+    rubric?: RubricCriterion[];
+    courseCode: string;
+    courseName: string;
+    classCode: string;
+    academicYear: string;
+    submissions: LecturerAssignmentSubmission[];
+    role: string;
+}
