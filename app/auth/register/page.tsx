@@ -10,6 +10,9 @@ import { Eye, EyeOff, GraduationCap, ShieldCheck } from "lucide-react";
 import { getAvatarUrl } from "@/lib/avatar";
 import { authClient } from "@/services/auth/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SECURITY_QUESTIONS } from "@/lib/security-questions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -25,6 +28,11 @@ export default function RegisterPage() {
     const [academicYear, setAcademicYear] = useState("");
     const [enrollmentKey, setEnrollmentKey] = useState("");
     const [showLearnMore, setShowLearnMore] = useState(false);
+
+    const [securityQuestion1, setSecurityQuestion1] = useState("");
+    const [securityAnswer1, setSecurityAnswer1] = useState("");
+    const [securityQuestion2, setSecurityQuestion2] = useState("");
+    const [securityAnswer2, setSecurityAnswer2] = useState("");
 
     const validate = (): string | null => {
         const trimmedName = name.trim();
@@ -42,6 +50,11 @@ export default function RegisterPage() {
         if (!academicYear.trim()) return "Academic year is required.";
         if (!/^\d{4}\/\d{4}$/.test(academicYear.trim())) return "Academic year must be in format e.g. 2024/2025.";
         if (!enrollmentKey.trim()) return "Enrollment key is required.";
+        if (!securityQuestion1) return "Please select your first security question.";
+        if (!securityAnswer1.trim()) return "Please answer your first security question.";
+        if (!securityQuestion2) return "Please select your second security question.";
+        if (!securityAnswer2.trim()) return "Please answer your second security question.";
+        if (securityQuestion1 === securityQuestion2) return "Please choose two different security questions.";
         return null;
     };
 
@@ -66,6 +79,10 @@ export default function RegisterPage() {
                 classCode: classCode.trim(),
                 academicYear: academicYear.trim(),
                 enrollmentKey: enrollmentKey.trim(),
+                securityQuestion1: securityQuestion1,
+                securityAnswer1: securityAnswer1,
+                securityQuestion2: securityQuestion2,
+                securityAnswer2: securityAnswer2,
             });
             if (error) {
                 toast.error(error.message ?? "Registration failed.");
@@ -85,7 +102,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background">
+        <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background w-full">
             <div className="w-full max-w-md space-y-8">
                 {/* Mobile Only */}
                 <div className="lg:hidden flex items-center justify-center select-none">
@@ -145,7 +162,69 @@ export default function RegisterPage() {
                             </button>
                         </div>
                     </div>
+
+                    <Separator className="bg-muted-foreground/30" />
+
+                    {/* security questions */}
+                    <div className="space-y-1">
+                        <h3 className="text-base font-semibold text-foreground select-none">Security Questions</h3>
+                        <p className="text-sm text-muted-foreground">Used to verify your identity if you forget your password.</p>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-foreground select-none">Question 1</label>
+                        <Select onValueChange={setSecurityQuestion1} disabled={loading}>
+                            <SelectTrigger className="h-10 cursor-pointer">
+                                <SelectValue placeholder="Select a question" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SECURITY_QUESTIONS.filter(q => q !== securityQuestion2).map((q) => (
+                                    <SelectItem key={q} value={q} className="cursor-pointer">{q}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <Input
+                        type="text"
+                        placeholder="Your secret answer for Question 1"
+                        value={securityAnswer1}
+                        onChange={(e) => setSecurityAnswer1(e.target.value)}
+                        disabled={loading}
+                        className="h-10"
+                    />
+
+                    <div className="flex flex-col gap-1">
+                        <label className="text-sm font-medium text-foreground select-none">Question 2</label>
+                        <Select onValueChange={setSecurityQuestion2} disabled={loading || !securityQuestion1}>
+                            <SelectTrigger className="h-10 cursor-pointer">
+                                <SelectValue placeholder="Select a question" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SECURITY_QUESTIONS.filter(q => q !== securityQuestion1).map((q) => (
+                                    <SelectItem key={q} value={q} className="cursor-pointer">{q}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <Input
+                        type="text"
+                        placeholder="Your secret answer for Question 2"
+                        value={securityAnswer2}
+                        onChange={(e) => setSecurityAnswer2(e.target.value)}
+                        disabled={loading}
+                        className="h-10"
+                    />
+
+                    <Separator className="bg-muted-foreground/30" />
                     
+
+                    <div className="space-y-1">
+                        <h3 className="text-base font-semibold text-foreground select-none">Enrollment</h3>
+                        <p className="text-sm text-muted-foreground">Enter your enrollment details here.</p>
+                    </div>
+
                     <div className="flex flex-col gap-1">
                         <label className="text-sm font-medium text-foreground select-none">Course Code</label>
                         <Input type="text" placeholder="e.g. CS101" value={courseCode} onChange={(e) => setCourseCode(e.target.value)} disabled={loading} className="h-10" />
@@ -163,7 +242,7 @@ export default function RegisterPage() {
                         <Input type="text" placeholder="Provided by your lecturer" value={enrollmentKey} onChange={(e) => setEnrollmentKey(e.target.value)} disabled={loading} className="h-10" />
                     </div>
 
-                    <Button className="w-full h-11 cursor-pointer" disabled={loading || !email || !password || !name || !confirmPassword || !courseCode || !classCode || !academicYear || !enrollmentKey} onClick={handleSubmit} >
+                    <Button className="w-full h-11 cursor-pointer mt-2" disabled={ loading || !email || !password || !name || !confirmPassword || !courseCode || !classCode || !academicYear || !enrollmentKey || !securityAnswer1 || !securityAnswer2 || !securityQuestion1 || !securityQuestion2 } onClick={handleSubmit} >
                         {loading ? "Signing up..." : "Sign Up"}
                     </Button>
                 </div>

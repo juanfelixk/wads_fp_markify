@@ -7,9 +7,9 @@ export default async function AuthLayout({children,}: {children: React.ReactNode
   const session = await getSession();
   if (session) redirect("/dashboard");
   return (
-    <div className="min-h-screen grid lg:grid-cols-[35%_65%]">
+    <div className="min-h-screen grid lg:grid-cols-[35%_65%] items-start">
         {/* left panel - large Screens Only */}
-        <div className="hidden lg:flex flex-col justify-center bg-primary text-primary-foreground px-20 border-r border-primary-foreground/10 select-none relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-center bg-primary text-primary-foreground px-20 border-r border-primary-foreground/10 select-none overflow-hidden sticky top-0 h-screen">
 
             <Circle className="absolute -top-20 -left-20 w-[400px] h-[400px] text-white/10" strokeWidth={.1} />
             <Circle className="absolute bottom-[-250px] right-[-200px] w-[700px] h-[700px] text-white/10" strokeWidth={.1} />
@@ -52,7 +52,9 @@ export default async function AuthLayout({children,}: {children: React.ReactNode
             </div>
         </div>
 
-        {children}
+        <div className="min-h-screen flex items-center justify-center w-full">
+            {children}
+        </div>
 
     </div>
   );

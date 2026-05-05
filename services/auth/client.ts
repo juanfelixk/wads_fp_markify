@@ -28,3 +28,24 @@ export async function loginWithEmail(email: string, password: string) {
     throw new Error(result.error.message);
   }
 }
+
+export async function fetchSecurityQuestions(email: string) {
+  const res = await fetch("/api/v1/auth/reset-password/questions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Failed to fetch questions.");
+  return data as { question1: string; question2: string };
+}
+
+export async function submitResetPassword( email: string, answer1: string, answer2: string, newPassword: string) {
+  const res = await fetch("/api/v1/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, answer1, answer2, newPassword }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? "Failed to reset password.");
+}

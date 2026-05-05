@@ -34,6 +34,12 @@ model User {
   updatedAt       DateTime @updatedAt
   institution String?
 
+  // security questions for password recovery
+  securityQuestion1  String?
+  securityAnswer1    String? // hashed
+  securityQuestion2  String?
+  securityAnswer2    String? // hashed
+
   accounts        Account[]
   sessions        Session[]
   lecturerClasses Class[]      @relation("LecturerClasses")

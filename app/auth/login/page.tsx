@@ -47,7 +47,7 @@ export default function LoginPage() {
   };
 
   return (
-        <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background">
+        <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background w-full">
             <div className="w-full max-w-md space-y-8">
                 {/* Mobile Only */}
                 <div className="lg:hidden flex items-center justify-center select-none">
@@ -71,7 +71,7 @@ export default function LoginPage() {
                     <div className="flex flex-col gap-1">
                         <div className="flex justify-between items-center">
                             <label htmlFor="password" className="text-sm font-medium text-foreground select-none">Password</label>
-                            <span className="text-sm text-foreground/70 hover:underline cursor-pointer">Forgot password?</span>
+                            <a className="text-sm text-foreground/70 hover:underline cursor-pointer" onClick={() => router.push("/auth/reset-password")}>Forgot password?</a>
                         </div>
                         <div className="relative">
                             <Input type={showPassword ? "text" : "password"} placeholder="Enter your password here" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} className="h-10 pr-10" />
