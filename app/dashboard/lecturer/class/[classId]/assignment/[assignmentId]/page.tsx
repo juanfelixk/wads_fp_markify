@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Award, ShieldCheck, Users, CheckCircle2, Search, Download, ClipboardList, Loader2, CalendarClock, CalendarCheck, ClockAlert, FileCheck, BadgeCheck } from "lucide-react";
+import { ArrowLeft, FileText, Award, ShieldCheck, Users, CheckCircle2, Search, Download, Loader2, CalendarClock, CalendarCheck, ClockAlert, FileCheck, BadgeCheck, Lock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,24 +11,19 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { fetchLecturerAssignmentPageData } from "@/services/assignments/client";
-import type { AssignmentStatus, LecturerAssignmentPageData } from "@/services/assignments/types";
+import type { LecturerAssignmentPageData } from "@/services/assignments/types";
 import { getAccentColor } from "@/lib/accent-color";
 import { statusConfig } from "@/services/assignments/constants";
 import RubricDialog from "@/components/feedback/rubric-dialog";
 import { fetchLecturerSubmissionFileUrl } from "@/services/submissions/client";
+import { toast } from "sonner";
+import { publishGradesClient } from "@/services/lecturer/client";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 function formatDateTime(dt: string) {
     const d = new Date(dt);
     return (d.toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" }) + ", " + d.toLocaleTimeString("en-MY", { hour: "2-digit", minute: "2-digit", hour12: true }));
-}
-
-function formatFileSize(bytes?: number) {
-    if (!bytes) return "—";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export default function LecturerAssignmentPage() {
@@ -42,6 +37,7 @@ export default function LecturerAssignmentPage() {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
     const [rubricOpen, setRubricOpen] = useState(false);
+    const [publishing, setPublishing] = useState(false);
 
     useEffect(() => {
         if (!classId || !assignmentId) return;
@@ -101,6 +97,34 @@ export default function LecturerAssignmentPage() {
 
     const { title, instructions, maxPoints, lateAllowed, startDate, endDate, rubric, courseCode, courseName, classCode, academicYear, role } = pageData;
     const color = getAccentColor(`${courseCode}-${academicYear}`);
+
+    const isPublished = !!pageData?.gradesPublishedAt;
+    const allGraded = pageData
+        ? pageData.submissions.filter((s) => s.status !== "NOT_SUBMITTED").every((s) => s.status === "GRADE_SAVED" || s.status === "GRADED")
+        : false;
+
+    async function handlePublish() {
+        setPublishing(true);
+        try {
+            const result = await publishGradesClient(classId, assignmentId);
+            setPageData((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        gradesPublishedAt: new Date().toISOString(),
+                        submissions: prev.submissions.map((s) =>
+                            s.status === "GRADE_SAVED" ? { ...s, status: "GRADED" } : s
+                        ),
+                    }
+                    : prev
+            );
+            toast.success(`${result.publishedCount} grade(s) published and released to students.`);
+        } catch (e) {
+            toast.error(e instanceof Error ? e.message : "Failed to publish grades.");
+        } finally {
+            setPublishing(false);
+        }
+    }
 
     return (
         <div className="container mx-auto px-4 sm:px-6 py-8 max-w-5xl">
@@ -224,11 +248,48 @@ export default function LecturerAssignmentPage() {
                             <SelectItem value="SUBMITTED_LATE" className="cursor-pointer">Submitted Late</SelectItem>
                             <SelectItem value="REVISED" className="cursor-pointer">Revised</SelectItem>
                             <SelectItem value="TO_BE_REVIEWED" className="cursor-pointer">To Be Reviewed</SelectItem>
+                            <SelectItem value="GRADE_SAVED" className="cursor-pointer">Grade Saved</SelectItem>
                             <SelectItem value="GRADED" className="cursor-pointer">Graded</SelectItem>
                         </SelectContent>
                     </Select>
+                    {isPublished ? (
+                        <Button disabled className="gap-1.5 cursor-not-allowed opacity-60">
+                            <Lock className="w-3.5 h-3.5" /> Grades Published
+                        </Button>
+                    ) : (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button className="gap-1.5 cursor-pointer bg-primary/90 hover:bg-primary" disabled={publishing || !allGraded} title={!allGraded ? "All submitted assignments must be graded before publishing" : undefined}>
+                                    {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BadgeCheck className="w-3.5 h-3.5" />}
+                                    Publish Grades
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Publish Grades</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will release all saved grades and comments to students. All students without submission will receive a score of <span className="text-destructive">0 (ZERO)</span>. Once published, grades cannot be edited. Make sure all grades are final before proceeding.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                                    <AlertDialogAction className="cursor-pointer" onClick={handlePublish}>
+                                        Publish
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
                 </div>
             </motion.div>
+
+            {/* published banner */}
+            {isPublished && (
+                <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30 px-4 py-3 text-sm text-green-700 dark:text-green-400 mb-4">
+                    <Lock className="w-4 h-4 shrink-0" />
+                    <span>All grades have been published and are now visible to students. Editing is no longer possible. Students with no submission are assigned with a score of 0.</span>
+                </div>
+            )}
 
             {/* table */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.25 }}>
@@ -254,7 +315,8 @@ export default function LecturerAssignmentPage() {
                                     </TableRow>
                                 ) : (
                                     filtered.map((s) => {
-                                        const canGrade = s.status !== "NOT_SUBMITTED";
+                                        const canGrade = s.status !== "NOT_SUBMITTED" && !!s.fileName && !!s.submittedAt
+                                        const isLocked = isPublished;
                                         const status = statusConfig[s.status];
                                         return (
                                             <TableRow key={s.id}>
@@ -269,17 +331,27 @@ export default function LecturerAssignmentPage() {
                                                         {status.label}
                                                     </Badge>
                                                 </TableCell>
-                                                <TableCell className="text-xs text-muted-foreground text-center">
-                                                    {s.fileName ? s.fileName : "—"}
+                                                <TableCell className="text-xs text-muted-foreground text-center max-w-[100px] truncate">
+                                                    {s.fileName 
+                                                        ? s.fileName 
+                                                        : s.status === "GRADED" 
+                                                            ? <span className="text-destructive">No Submission</span>
+                                                            : "—"
+                                                    }
                                                 </TableCell>
                                                 <TableCell className="text-xs text-muted-foreground text-center">
-                                                    {s.submittedAt ? formatDateTime(s.submittedAt) : "—"}
+                                                    {s.submittedAt 
+                                                        ? formatDateTime(s.submittedAt) 
+                                                        : s.status === "GRADED" 
+                                                            ? <span className="text-destructive">No Submission</span>
+                                                            : "—"
+                                                    }
                                                 </TableCell>
                                                 <TableCell className="text-center">
                                                     {s.finalScore != null ? (
                                                         <span className="font-semibold text-foreground">
                                                             {s.finalScore}
-                                                            <span className="text-xs text-muted-foreground font-normal">/{maxPoints}</span>
+                                                            <span className="text-xs text-muted-foreground font-normal"> / {maxPoints}</span>
                                                         </span>
                                                     ) : (
                                                         <span className="text-xs text-muted-foreground">—</span>
@@ -287,9 +359,9 @@ export default function LecturerAssignmentPage() {
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex items-center justify-center gap-2">
-                                                        <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer" disabled={!canGrade} onClick={() => router.push(`/dashboard/lecturer/class/${classId}/assignment/${assignmentId}/grading/${s.id}`)}>
-                                                            <BadgeCheck className="w-3.5 h-3.5" />
-                                                            Grade
+                                                        <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer" disabled={!canGrade} onClick={() => window.open(`/dashboard/lecturer/class/${classId}/assignment/${assignmentId}/grading/${s.id}`, "_blank")}>
+                                                            {isLocked ? <Eye className="w-3.5 h-3.5" /> : <BadgeCheck className="w-3.5 h-3.5" />}
+                                                            {isLocked ? "View" : "Grade"}
                                                         </Button>
                                                         <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer" disabled={!canGrade} onClick={async () => {
                                                             const url = await fetchLecturerSubmissionFileUrl(classId, assignmentId, s.studentId);

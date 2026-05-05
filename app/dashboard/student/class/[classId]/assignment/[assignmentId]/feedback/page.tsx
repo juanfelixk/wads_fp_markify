@@ -14,9 +14,8 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchSubmissionFileUrl } from "@/services/submissions/client";
 import { fetchFeedbackPageData } from "@/services/feedback/client";
-import type { FeedbackPageData } from "@/services/feedback/types";
 import { statusConfig } from "@/services/assignments/constants";
-import { GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
+import { FeedbackPageData, GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
 import RubricDialog from "@/components/feedback/rubric-dialog";
 import AnnotationSidebar from "@/components/feedback/annotation-card";
 import GrammarCard from "@/components/feedback/grammar-card";
@@ -118,12 +117,12 @@ function ScoresCard({ data, aiTimedOut }: { data: FeedbackPageData, aiTimedOut?:
                 <div>
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-medium text-primary tracking-wide">Final Score</span>
-                        {finalPct != null
+                        {finalPct != null && data.status === "GRADED"
                         ? <span className="text-lg font-bold text-primary tabular-nums">{data.finalScore}<span className="text-sm font-normal text-muted-foreground"> / {data.maxPoints}</span></span>
                         : <span className="text-xs text-muted-foreground italic flex items-center gap-1"><Clock className="w-3 h-3" /> Pending review</span>
                         }
                     </div>
-                    {finalPct != null && <Progress value={finalPct} className="h-1.5" />}
+                    {finalPct != null && data.status === "GRADED" && <Progress value={finalPct} className="h-1.5" />}
                     <p className="text-xs text-muted-foreground mt-1.5">Finalised by your instructor after manual review.</p>
                 </div>
                 {data.rubric && data.rubric.length > 0 && (
@@ -140,8 +139,8 @@ function ScoresCard({ data, aiTimedOut }: { data: FeedbackPageData, aiTimedOut?:
     );
 }
 
-function InstructorCommentCard({ comment }: { comment: string | null }) {
-  if (!comment) {
+function InstructorCommentCard({ comment, status }: { comment: string | null, status: string }) {
+  if (!comment || status !== "GRADED") {
     return (
         <Card className="border-dashed">
             <CardContent className="px-5 space-y-4">
@@ -341,7 +340,7 @@ export default function FeedbackStudioPage() {
                             ) : (
                                 <>
                                     <ScoresCard data={data} aiTimedOut={aiTimedOut} />
-                                    <InstructorCommentCard comment={data.comment} />
+                                    <InstructorCommentCard comment={data.comment} status={data.status} />
                                     <AnnotationSidebar annotations={data.aiScore != null ? data.annotations : []} activeId={activeAnnotation} onSelect={setActiveAnnotation} aiTimedOut={aiTimedOut} status={data.status} />
                                     <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} aiTimedOut={aiTimedOut} status={data.status} />
                                     <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} aiTimedOut={aiTimedOut} status={data.status} />

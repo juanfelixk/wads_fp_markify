@@ -25,4 +25,8 @@ export const statusConfig: Record<AssignmentStatus, { label: string; className: 
         label: "To Be Reviewed",
         className: "border-yellow-400/40 text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-950/40"
     },
+    GRADE_SAVED: {
+        label: "Grade Saved",
+        className: "border-teal-400/40 text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-950/40"
+    }
 };

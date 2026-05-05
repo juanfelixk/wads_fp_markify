@@ -56,7 +56,7 @@ export async function getFeedbackPageData(classId: string, assignmentId: string,
         submittedAt: submission.submittedAt?.toISOString() ?? null,
     
         isIrrelevant: submission.isIrrelevant,
-        status: submission.status,
+        status: submission.status === "GRADE_SAVED" ? "TO_BE_REVIEWED" : submission.status,
         fileName: displayFileName,
         aiScore: submission.aiScore,
         finalScore: submission.finalScore,

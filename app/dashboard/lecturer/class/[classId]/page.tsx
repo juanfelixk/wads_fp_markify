@@ -213,7 +213,7 @@ export default function LecturerClassPage() {
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center gap-3 shrink-0 ml-4">
+                                        <div className="flex items-center gap-3 shrink-0 ml-0 sm:ml-4 w-full sm:w-auto justify-end">
                                             <Button variant="outline" size="sm" className="gap-1.5 cursor-pointer" onClick={() => router.push(`/dashboard/lecturer/class/${classId}/assignment/${assignment.id}`)}>
                                                 <Eye className="w-3.5 h-3.5" />
                                                 <span className="hidden sm:inline">View</span>
@@ -235,7 +235,7 @@ export default function LecturerClassPage() {
                                                     <AlertDialogHeader className="select-none">
                                                         <AlertDialogTitle>Delete Assignment</AlertDialogTitle>
                                                         <AlertDialogDescription className="my-2">
-                                                            Are you sure you want to delete <span className="font-medium text-foreground">{assignment.title}</span>? All data related to this assignment will be deleted. This action cannot be undone.
+                                                            Are you sure you want to delete <span className="font-medium text-foreground">{assignment.title}</span>? All submissions and data related to this assignment will be deleted. This action cannot be undone.
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>

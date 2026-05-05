@@ -20,6 +20,7 @@ enum SubmissionStatus {
   GRADED
   SUBMITTED_LATE
   TO_BE_REVIEWED
+  GRADE_SAVED
 }
 
 model User {
@@ -144,6 +145,7 @@ model Assignment {
   classId      String
   class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   submissions  Submission[]
+  gradesPublishedAt DateTime?
 
   startDate    DateTime
   endDate      DateTime

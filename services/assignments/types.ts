@@ -6,7 +6,8 @@ export type AssignmentStatus =
     | "REVISED"
     | "GRADED"
     | "SUBMITTED_LATE"
-    | "TO_BE_REVIEWED";
+    | "TO_BE_REVIEWED"
+    | "GRADE_SAVED";
 
 export interface Assignment {
     id: string;
@@ -111,4 +112,5 @@ export interface LecturerAssignmentPageData {
     academicYear: string;
     submissions: LecturerAssignmentSubmission[];
     role: string;
+    gradesPublishedAt: string | null;
 }

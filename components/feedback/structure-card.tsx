@@ -20,13 +20,13 @@ export default function StructureCard({ structure, aiTimedOut, status }: { struc
                         <p className="text-sm italic flex items-center gap-2 text-amber-500">
                             <AlertCircle className="w-3.5 h-3.5" /> AI currently unavailable, please try again later.
                         </p>
-                    ) : status === "TO_BE_REVIEWED" ? (
+                    ) : status === "TO_BE_REVIEWED" || status === "GRADED" || status ==="GRADE_SAVED" ? (
                         <p className="text-sm text-muted-foreground italic flex items-center gap-2">
                             <Check className="w-3.5 h-3.5" /> No issue found.
                         </p>
                     ) : (
                         <p className="text-sm text-muted-foreground italic flex items-center gap-2">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysis in progress…
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Analysis in progress...
                         </p>
                     )}
             </CardContent>

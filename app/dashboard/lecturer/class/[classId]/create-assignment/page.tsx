@@ -24,15 +24,23 @@ function emptycriterion(): RubricCriterion {
     return { name: "", description: "", maxPoints: 10, weight: 0 };
 }
 
+function toLocalDatetimeString(isoString: string): string {
+    const date = new Date(isoString);
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+}
+
 function RubricModal({ open, onClose, criteria, onChange }: RubricModalProps) {
     const [draft, setDraft] = useState<RubricCriterion[]>(
         criteria.length > 0 ? criteria : [emptycriterion()]
     );
 
     // keep draft in sync when modal reopens with existing data
-    const handleOpen = (isOpen: boolean) => {
-        if (isOpen) setDraft(criteria.length > 0 ? criteria : [emptycriterion()]);
-    };
+    useEffect(() => {
+        if (open) {
+            setDraft(criteria.length > 0 ? criteria : [emptycriterion()]);
+        }
+    }, [open, criteria]);
 
     const update = (i: number, field: keyof RubricCriterion, value: string | number) => {
         setDraft((prev) => prev.map((c, idx) => idx === i ? { ...c, [field]: value } : c));
@@ -72,7 +80,7 @@ function RubricModal({ open, onClose, criteria, onChange }: RubricModalProps) {
     };
 
     return (
-        <Dialog open={open} onOpenChange={(o) => { handleOpen(o); if (!o) onClose(); }}>
+        <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
             <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Configure Rubric</DialogTitle>
@@ -193,8 +201,8 @@ export default function CreateAssignmentPage() {
                 setInstructions(data.instructions);
                 setMaxPoints(String(data.maxPoints));
                 setLateAllowed(data.lateAllowed);
-                setStartDate(data.startDate);
-                setEndDate(data.endDate);
+                setStartDate(toLocalDatetimeString(data.startDate));
+                setEndDate(toLocalDatetimeString(data.endDate));
                 setRubric(data.rubric);
             })
             .catch((err) => toast.error(err.message))
@@ -308,20 +316,19 @@ export default function CreateAssignmentPage() {
                         <label className="text-sm font-medium text-foreground select-none">
                             Rubric <span className="text-destructive">*</span>
                         </label>
-                        <button type="button" onClick={() => setRubricOpen(true)} disabled={loading}
+                        <button type="button" onClick={() => !loading && setRubricOpen(true)}
                             className={[
-                                "flex items-center justify-between w-full rounded-md border px-3 h-10 text-sm transition-colors",
-                                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                "flex items-center justify-between w-full rounded-md border px-3 h-10 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                 rubric.length > 0
                                     ? "border-primary/40 bg-primary/5 text-foreground"
                                     : "border-input bg-background text-muted-foreground hover:bg-accent/40",
-                                loading ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+                                loading ? "opacity-50 pointer-events-none" : "cursor-pointer!",
                             ].join(" ")}>
                             <span className="flex items-center gap-2">
                                 <ListChecks className="w-4 h-4 shrink-0" />
                                 {rubric.length > 0
                                     ? `${rubric.length} criteri${rubric.length > 1 ? "a" : "on"} configured`
-                                    : "Configure rubric…"}
+                                    : "Configure rubric..."}
                             </span>
                             {rubric.length > 0 && (
                                 <span className="text-xs text-primary font-medium">Edit</span>

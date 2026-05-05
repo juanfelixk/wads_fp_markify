@@ -2,24 +2,24 @@ import { RubricCriterion } from "../assignments/types";
 import type { SubmissionCriterionScore } from "@/generated/prisma";
 
 export interface FeedbackPageData {
-    courseCode: string;
-    courseName: string;
-    classCode: string;
-    assignmentTitle: string;
-    status: "NOT_SUBMITTED" | "SUBMITTED" | "SUBMITTED_LATE" | "REVISED" | "GRADED" | "TO_BE_REVIEWED";
-    fileName: string | null;
-    aiScore: number | null;
-    finalScore: number | null;
-    comment: string | null;
-    maxPoints: number | null;
-    aiGrammarFeedback: unknown | null;
-    aiStructureFeedback: unknown | null;
-    annotations: Annotation[];
-    rubric: RubricCriterion[] | null;
-    criterionScores: SubmissionCriterionScore[] | null;
-    role: "STUDENT" | "LECTURER";
-    isIrrelevant: boolean;
-    submittedAt: string | null;
+  courseCode: string;
+  courseName: string;
+  classCode: string;
+  assignmentTitle: string;
+  status: "NOT_SUBMITTED" | "SUBMITTED" | "SUBMITTED_LATE" | "REVISED" | "GRADED" | "TO_BE_REVIEWED" | "GRADE_SAVED"; // GRADE_SAVED is only for lecturer
+  fileName: string | null;
+  aiScore: number | null;
+  finalScore: number | null;
+  comment: string | null;
+  maxPoints: number | null;
+  aiGrammarFeedback: unknown | null;
+  aiStructureFeedback: unknown | null;
+  annotations: Annotation[];
+  rubric: RubricCriterion[] | null;
+  criterionScores: SubmissionCriterionScore[] | null;
+  role: "STUDENT" | "LECTURER";
+  isIrrelevant: boolean;
+  submittedAt: string | null;
 }
 
 export type AnnotationType = "PRAISE" | "ISSUE" | "SUGGESTION";

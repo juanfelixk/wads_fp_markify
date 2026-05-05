@@ -309,7 +309,11 @@ export async function getLecturerAssignmentPageData(classId: string, assignmentI
         };
     });
 
-    allSubmissions.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    allSubmissions.sort((a, b) => {
+        const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+        if (statusDiff !== 0) return statusDiff;
+        return a.studentName.localeCompare(b.studentName);
+    });
 
     return {
         id: assignment.id,
@@ -326,5 +330,6 @@ export async function getLecturerAssignmentPageData(classId: string, assignmentI
         academicYear: cls.academicYear,
         submissions: allSubmissions,
         role: "LECTURER",
+        gradesPublishedAt: assignment.gradesPublishedAt,
     };
 }
