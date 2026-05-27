@@ -65,7 +65,7 @@ export default function ResetPasswordPage() {
             toast.success("Password reset successfully. Please log in.");
             router.push("/auth/login");
         } catch (err: any) {
-            // answers/password fields are NOT cleared on failure
+            // answers/password fields are not cleared on failure
             toast.error(err.message);
         } finally {
             setLoadingReset(false);
@@ -75,7 +75,7 @@ export default function ResetPasswordPage() {
     return (
         <div className="flex items-center justify-center px-6 sm:px-10 py-12 bg-background w-full">
             <div className="w-full max-w-md space-y-8">
-                {/* Mobile Only */}
+                {/* mobile only */}
                 <div className="lg:hidden flex items-center justify-center select-none">
                     <Image src={"/logo-full.png"} alt="Markify Logo" height={0} width={260} />
                 </div>
@@ -93,20 +93,9 @@ export default function ResetPasswordPage() {
                     <div className="space-y-5">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">Email</label>
-                            <Input
-                                type="email"
-                                placeholder="example@university.edu"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                disabled={loadingQuestions}
-                                className="h-10"
-                            />
+                            <Input type="email" placeholder="example@university.edu" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loadingQuestions} className="h-10" />
                         </div>
-                        <Button
-                            className="w-full h-11 cursor-pointer"
-                            onClick={handleFetchQuestions}
-                            disabled={loadingQuestions || !email}
-                        >
+                        <Button className="w-full h-11 cursor-pointer" onClick={handleFetchQuestions} disabled={loadingQuestions || !email}>
                             {loadingQuestions ? "Looking up..." : "Continue"}
                         </Button>
                     </div>
@@ -116,26 +105,12 @@ export default function ResetPasswordPage() {
                     <div className="space-y-5 mb-2!">
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">{question1}</label>
-                            <Input
-                                type="text"
-                                placeholder="Your answer"
-                                value={answer1}
-                                onChange={(e) => setAnswer1(e.target.value)}
-                                disabled={loadingReset}
-                                className="h-10"
-                            />
+                            <Input type="text" placeholder="Your answer" value={answer1} onChange={(e) => setAnswer1(e.target.value)}disabled={loadingReset} className="h-10" />
                         </div>
 
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">{question2}</label>
-                            <Input
-                                type="text"
-                                placeholder="Your answer"
-                                value={answer2}
-                                onChange={(e) => setAnswer2(e.target.value)}
-                                disabled={loadingReset}
-                                className="h-10"
-                            />
+                            <Input type="text" placeholder="Your answer" value={answer2} onChange={(e) => setAnswer2(e.target.value)} disabled={loadingReset} className="h-10" />
                         </div>
 
                         <Separator className="my-4 bg-foreground/20" />
@@ -143,14 +118,7 @@ export default function ResetPasswordPage() {
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">New Password</label>
                             <div className="relative">
-                                <Input
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter new password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                    disabled={loadingReset}
-                                    className="h-10 pr-10"
-                                />
+                                <Input type={showPassword ? "text" : "password"} placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} disabled={loadingReset} className="h-10 pr-10" />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
@@ -163,33 +131,18 @@ export default function ResetPasswordPage() {
                         <div className="flex flex-col gap-1">
                             <label className="text-sm font-medium text-foreground select-none">Confirm New Password</label>
                             <div className="relative">
-                                <Input
-                                    type={showConfirm ? "text" : "password"}
-                                    placeholder="Confirm new password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    disabled={loadingReset}
-                                    className="h-10 pr-10"
-                                />
+                                <Input type={showConfirm ? "text" : "password"} placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={loadingReset} className="h-10 pr-10" />
                                 <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
                                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                             </div>
                         </div>
 
-                        <Button
-                            className="w-full h-11 cursor-pointer"
-                            onClick={handleReset}
-                            disabled={loadingReset || !answer1 || !answer2 || !newPassword || !confirmPassword}
-                        >
+                        <Button className="w-full h-11 cursor-pointer" onClick={handleReset} disabled={loadingReset || !answer1 || !answer2 || !newPassword || !confirmPassword}>
                             {loadingReset ? "Resetting..." : "Reset Password"}
                         </Button>
 
-                        <button
-                            onClick={() => setStep(1)}
-                            className="w-full text-sm text-muted-foreground hover:underline cursor-pointer text-center"
-                            disabled={loadingReset}
-                        >
+                        <button onClick={() => setStep(1)} className="w-full text-sm text-muted-foreground hover:underline cursor-pointer text-center" disabled={loadingReset}>
                             Use a different email
                         </button>
                     </div>
