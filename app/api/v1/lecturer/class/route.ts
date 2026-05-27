@@ -4,6 +4,151 @@ import { getLecturerClasses } from "@/services/classes/server";
 import { ClassSummary } from "@/services/classes/types";
 import { createClass, generateUniqueEnrollmentKey } from "@/services/lecturer/server";
 
+/**
+ * @swagger
+ * /api/v1/lecturer/class:
+ *   get:
+ *     summary: Get lecturer classes
+ *     description: Retrieve all classes owned by the authenticated lecturer.
+ *     tags:
+ *       - Lecturer
+ *       - Class
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved lecturer classes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   classId:
+ *                     type: string
+ *                     example: class123
+ *                   courseCode:
+ *                     type: string
+ *                     example: CS101
+ *                   classCode:
+ *                     type: string
+ *                     example: A
+ *                   courseName:
+ *                     type: string
+ *                     example: Web Development
+ *                   institution:
+ *                     type: string
+ *                     example: Example University
+ *                   academicYear:
+ *                     type: string
+ *                     example: 2025/2026
+ *                   lecturer:
+ *                     type: string
+ *                     example: John Doe
+ *                   students:
+ *                     type: number
+ *                     example: 35
+ *                   enrollmentKey:
+ *                     type: string
+ *                     example: ABC12345
+ *       401:
+ *         description: Unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *
+ *   post:
+ *     summary: Create a new class
+ *     description: Create a new lecturer class with a generated enrollment key.
+ *     tags:
+ *       - Lecturer
+ *       - Class
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - courseId
+ *               - code
+ *               - academicYear
+ *             properties:
+ *               courseId:
+ *                 type: string
+ *                 example: course123
+ *               code:
+ *                 type: string
+ *                 example: A
+ *               academicYear:
+ *                 type: string
+ *                 example: 2025/2026
+ *     responses:
+ *       201:
+ *         description: Class created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               example:
+ *                 id: class123
+ *                 code: A
+ *                 academicYear: 2025/2026
+ *                 enrollmentKey: ABC12345
+ *       400:
+ *         description: Missing or invalid fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   examples:
+ *                     missingFields:
+ *                       value: Missing required fields.
+ *                     invalidCode:
+ *                       value: Class code must be alphanumeric.
+ *       401:
+ *         description: Unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Unauthorized
+ *       403:
+ *         description: Forbidden access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Forbidden
+ *       409:
+ *         description: Failed to create class or class conflict
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to create class.
+ */
+
 export async function GET() {
     const session = await getSession();
     if (!session || session.user.role !== "LECTURER") {

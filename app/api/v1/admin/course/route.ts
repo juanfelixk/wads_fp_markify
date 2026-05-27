@@ -2,6 +2,61 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/services/auth/server";
 import { getCourses, registerCourse } from "@/services/admin/server"; 
 
+/**
+ * @swagger
+ * /api/v1/admin/course:
+ *   post:
+ *     summary: Register a new course
+ *     tags:
+ *       - Admin
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *               - name
+ *             properties:
+ *               code:
+ *                 type: string
+ *               name:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Course created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Course'
+ *       400:
+ *         description: Course code and name are required
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       409:
+ *         description: Conflict or duplicate course
+ *   get:
+ *     summary: Get all courses for the authenticated admin's institution
+ *     tags:
+ *       - Admin
+ *     responses:
+ *       200:
+ *         description: List of courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Course'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
+
 export async function POST(req: NextRequest) {
     const session = await getSession();
     if (!session) {
