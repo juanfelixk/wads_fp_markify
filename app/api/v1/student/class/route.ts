@@ -140,7 +140,8 @@ export async function POST(req: Request) {
         const body = await req.json();
         const result = await enrollStudent(session.user.id, body.courseCode, body.classCode, body.academicYear, body.enrollmentKey);
         return Response.json({ data: result }, { status: 201 });
-    } catch (err: any) {
-        return Response.json({ error: err.message || "Enrollment failed" }, { status: 400 });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        return Response.json({ error: message }, { status: 400 });
     }
 }

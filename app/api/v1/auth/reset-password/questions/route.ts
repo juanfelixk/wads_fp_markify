@@ -53,7 +53,8 @@ export async function POST(req: NextRequest) {
 
         const questions = await getUserSecurityQuestions(email);
         return NextResponse.json(questions);
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 400 });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        return NextResponse.json({ error: message }, { status: 400 });
     }
 }

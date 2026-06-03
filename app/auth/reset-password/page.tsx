@@ -37,8 +37,9 @@ export default function ResetPasswordPage() {
             setQuestion1(data.question1);
             setQuestion2(data.question2);
             setStep(2);
-        } catch (err: any) {
-            toast.error(err.message);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Something went wrong.";
+            toast.error(msg);
         } finally {
             setLoadingQuestions(false);
         }
@@ -64,9 +65,9 @@ export default function ResetPasswordPage() {
             await submitResetPassword(email.trim(), answer1, answer2, newPassword);
             toast.success("Password reset successfully. Please log in.");
             router.push("/auth/login");
-        } catch (err: any) {
-            // answers/password fields are not cleared on failure
-            toast.error(err.message);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : "Something went wrong.";
+            toast.error(msg);
         } finally {
             setLoadingReset(false);
         }

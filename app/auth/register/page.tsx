@@ -265,7 +265,7 @@ export default function RegisterPage() {
                             <div className="space-y-1">
                                 <p className="font-semibold text-foreground text-base">Lecturer</p>
                                 <p className="text-sm text-muted-foreground">
-                                    Lecturer accounts are created by your institution's admin. You will receive your login credentials directly from them.
+                                    Lecturer accounts are created by your institution&apos;s admin. You will receive your login credentials directly from them.
                                 </p>
                             </div>
                         </div>

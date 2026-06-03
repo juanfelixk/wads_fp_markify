@@ -87,7 +87,8 @@ export async function POST(req: NextRequest) {
 
         await resetPasswordWithSecurityAnswers(email, answer1, answer2, newPassword);
         return NextResponse.json({ success: true });
-    } catch (err: any) {
-        return NextResponse.json({ error: err.message }, { status: 400 });
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Something went wrong";
+        return NextResponse.json({ error: message }, { status: 400 });
     }
 }

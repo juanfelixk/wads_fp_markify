@@ -19,30 +19,31 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     try {
-      setLoading(true);
-      await loginWithGoogle();
-      toast.info("Logging in...");
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error.message || "Login failed.");
+        setLoading(true);
+        await loginWithGoogle();
+        toast.info("Logging in...");
+    } catch (error) {
+        console.error(error);
+        const msg = error instanceof Error ? error.message : "Login failed.";
+        toast.error(msg);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
   const handleEmailLogin = async () => {
     try {
-      setLoading(true);
-      await loginWithEmail(email, password);
-      toast.success("Login success.");
-      router.push("/dashboard");
-      router.refresh();
-    } catch (error: any) {
-      console.error(error);
-      let message = "Incorrect credentials.";
-      toast.error(message);
+        setLoading(true);
+        await loginWithEmail(email, password);
+        toast.success("Login success.");
+        router.push("/dashboard");
+        router.refresh();
+    } catch (error) {
+        console.error(error);
+        const message = "Incorrect credentials.";
+        toast.error(message);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -102,7 +103,7 @@ export default function LoginPage() {
                 </Button>
 
                 <div className="flex items-center justify-center gap-1">
-                    <span className="text-foreground/70 select-none">Don't have an account yet?</span>
+                    <span className="text-foreground/70 select-none">Don&apos;t have an account yet?</span>
                     <a className="text-primary hover:underline cursor-pointer" href="/auth/register">Sign up</a>
                 </div>
             </div>
