@@ -310,7 +310,7 @@ export default function LecturerAssignmentPage() {
                                 {filtered.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-10">
-                                            Couldn't resolve any submissions.
+                                            Couldn&apos;t resolve any submissions.
                                         </TableCell>
                                     </TableRow>
                                 ) : (

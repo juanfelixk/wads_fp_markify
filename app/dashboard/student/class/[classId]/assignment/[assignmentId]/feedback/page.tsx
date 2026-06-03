@@ -69,7 +69,7 @@ function PastVersionBanner() {
                     <div className="space-y-1.5">
                         <h3 className="text-base font-semibold">Past Version</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">
-                            You're viewing an older version of your submission. Feedback is only available for your latest submission.
+                            You&apos;re viewing an older version of your submission. Feedback is only available for your latest submission.
                         </p>
                     </div>
                 </div>
@@ -145,7 +145,7 @@ function InstructorCommentCard({ comment, status }: { comment: string | null, st
         <Card className="border-dashed">
             <CardContent className="px-5 space-y-4">
                 <h3 className="text-base font-semibold flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-primary" /> Lecturer's Comment
+                    <MessageSquare className="w-4 h-4 text-primary" /> Lecturer&apos;s Comment
                 </h3>
             <p className="text-sm text-muted-foreground italic">No comment yet, check back after grading.</p>
             </CardContent>

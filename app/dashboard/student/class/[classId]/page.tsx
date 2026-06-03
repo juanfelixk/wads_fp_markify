@@ -68,7 +68,7 @@ export default function StudentClassPage() {
         return (
             <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center py-24 text-center gap-3">
                 <AlertCircle className="w-8 h-8 text-muted-foreground" />
-                <p className="text-muted-foreground text-sm">Class not found or you don't have access.</p>
+                <p className="text-muted-foreground text-sm">Class not found or you don&apos;t have access.</p>
                 <Button variant="ghost" size="lg" className="gap-2 cursor-pointer hover:bg-foreground/10 text-muted-foreground" onClick={() => router.push("/dashboard/student")}>
                     <ArrowLeft className="w-4 h-4" />
                     Back to Dashboard

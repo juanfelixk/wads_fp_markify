@@ -22,6 +22,7 @@ import AnnotationSidebar from "@/components/feedback/annotation-card";
 import GrammarCard from "@/components/feedback/grammar-card";
 import StructureCard from "@/components/feedback/structure-card";
 import type { SubmissionCriterionScore } from "@/generated/prisma";
+import { GrammarFeedback, StructureFeedback } from "@/services/feedback/types";
 
 // ssr:false prevents DOMMatrix / canvas errors on the server
 const PdfViewerInner = dynamic(() => import("@/components/feedback/pdf-viewer-inner"), {
@@ -450,8 +451,8 @@ export default function GradingStudioPage() {
                             <>
                                 <AIScoreCard data={data} />
                                 <AnnotationSidebar annotations={data.annotations} activeId={activeAnnotation} onSelect={setActiveAnnotation} status={data.status} />
-                                <GrammarCard grammar={data.aiGrammarFeedback as any} status={data.status} />
-                                <StructureCard structure={data.aiStructureFeedback as any} status={data.status} />
+                                <GrammarCard grammar={data.aiGrammarFeedback as GrammarFeedback | null} status={data.status} />
+                                <StructureCard structure={data.aiStructureFeedback as StructureFeedback | null} status={data.status} />
                                 {data.criterionScores && data.criterionScores.length > 0 && (
                                     <CriterionScoresCard criterionScores={data.criterionScores} overrides={overrides} onOverrideChange={handleOverrideChange} isPublished={isPublished} />
                                 )}

@@ -47,7 +47,7 @@ export default function OnboardingPage() {
                     <Image src={"/logo-full.png"} alt="Markify Logo" height={0} width={200} />
                 </div>
                 <div className="mb-4">
-                    <h1 className="text-2xl font-semibold tracking-tight">Welcome! Let's get you enrolled</h1>
+                    <h1 className="text-2xl font-semibold tracking-tight">Welcome! Let&apos;s get you enrolled</h1>
                     <p className="text-sm text-muted-foreground mt-1">Enter your class details provided by your lecturer to get started</p>
                 </div>
 

@@ -46,7 +46,7 @@ export default function RegisterLecturerPage() {
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-4">
                     <h1 className="text-2xl font-semibold tracking-tight">Register a new lecturer</h1>
                     <p className="text-sm text-muted-foreground mt-1">
-                        The new lecturer's account will be created with this default password. Please share this with them so they can log in and change it. <br />
+                        The new lecturer&apos;s account will be created with this default password. Please share this with them so they can log in and change it. <br />
                         <span className="font-mono font-medium text-foreground">{defaultPassword}</span>
                     </p>
                 </motion.div>

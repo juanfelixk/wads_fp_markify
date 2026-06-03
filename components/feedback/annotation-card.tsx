@@ -63,7 +63,7 @@ export default function AnnotationSidebar({ annotations, activeId, onSelect, aiT
                                     <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${s.text}`} />
                                     <div className="min-w-0">
                                         <p className={`text-[11px] font-semibold uppercase tracking-wide mb-0.5 ${s.text}`}>{s.label} (page {ann.page})</p>
-                                        {ann.quote && <p className="text-[11px] text-muted-foreground italic line-clamp-1 mb-0.5">"{ann.quote}"</p>}
+                                        {ann.quote && <p className="text-[11px] text-muted-foreground italic line-clamp-1 mb-0.5">&ldquo;{ann.quote}&rdquo;</p>}
                                         <p className="text-xs text-foreground/80 line-clamp-2">{ann.content}</p>
                                     </div>
                                 </div>
