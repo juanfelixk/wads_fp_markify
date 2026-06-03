@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { registerCourseClient } from "@/services/admin/client";
 import { authClient } from "@/services/auth/client";
 import { motion } from "framer-motion";
-import { BookPlus, Building2 } from "lucide-react";
 
 export default function RegisterCoursePage() {
     const router = useRouter();

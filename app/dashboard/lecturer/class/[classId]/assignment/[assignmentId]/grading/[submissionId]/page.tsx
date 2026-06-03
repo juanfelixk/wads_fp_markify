@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import { ArrowLeft, ChevronRight, Award, Sparkles, FileText, Loader2, Save, ShieldCheck, User, PencilLine, RotateCcw, AlertTriangle, ArrowBigRightDash, Lock } from "lucide-react";
+import { ArrowLeft, ChevronRight, Award, Sparkles, FileText, Loader2, Save, RotateCcw, AlertTriangle, ArrowBigRightDash, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
