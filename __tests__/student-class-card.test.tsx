@@ -2,10 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import ClassCard from "@/components/dashboard/student-class-card";
 import { ClassSummary } from "@/services/classes/types";
 
-// 1 FAILURE
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 jest.mock("@/lib/accent-color", () => ({
   getAccentColor: jest.fn(() => "210 100% 56%"),
 }));
@@ -38,8 +34,6 @@ jest.mock("@/components/ui/alert-dialog", () => ({
   ),
 }));
 
-// ─── Fixture ──────────────────────────────────────────────────────────────────
-
 const cls: ClassSummary = {
   classId: "cls-1",
   courseCode: "CS",
@@ -59,8 +53,6 @@ const baseProps = {
 };
 
 beforeEach(() => jest.clearAllMocks());
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("ClassCard — rendering", () => {
   it("renders course code and class code", () => {

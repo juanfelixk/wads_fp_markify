@@ -2,8 +2,6 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Navbar from "@/components/dashboard/navbar";
 import * as authClient from "@/services/auth/client";
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 const mockPush = jest.fn();
 let mockPathname = "/dashboard/student";
 
@@ -63,14 +61,10 @@ jest.mock("@/components/ui/dropdown-menu", () => ({
   DropdownMenuSeparator: () => <hr />,
 }));
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockPathname = "/dashboard/student";
 });
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("Navbar — nav items by role", () => {
   it("renders student nav items for STUDENT role", () => {

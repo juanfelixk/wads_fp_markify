@@ -81,12 +81,12 @@ export default function RubricDialog({ open, onOpenChange, title, rubric, totalP
                             Total
                             </span>
                             <span className="text-base font-bold text-primary tabular-nums">
-                            {(scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? "-")} / {totalPoints}
+                                {(scores?.reduce((sum, s) => sum + s.pointsAwarded, 0) ?? "-")} / {totalPoints}
                             </span>
                         </div>
                         ) : role === "STUDENT" ? (
                             <div className="text-xs text-muted-foreground text-right italic">
-                                Pending lecturer review...
+                                Pending...
                             </div>
                         ) : (
                             <></>

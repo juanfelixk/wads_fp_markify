@@ -2,10 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import StructureCard from "@/components/feedback/structure-card";
 import { StructureFeedback } from "@/services/feedback/types";
 
-// 1 FAILURE
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 jest.mock("@/components/ui/card", () => ({
   Card: ({ children, className }: any) => <div data-testid="card" className={className}>{children}</div>,
   CardHeader: ({ children, className }: any) => <div data-testid="card-header" className={className}>{children}</div>,
@@ -25,8 +21,6 @@ jest.mock("@/components/ui/progress", () => ({
   Progress: ({ value }: any) => <div data-testid="progress" data-value={value} />,
 }));
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
-
 const makeSection = (overrides = {}) => ({
   name: "Introduction",
   score: 7,
@@ -40,8 +34,6 @@ const makeStructure = (overrides: Partial<StructureFeedback> = {}): StructureFee
   sections: [makeSection()],
   ...overrides,
 });
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
 
 describe("StructureCard — empty state", () => {
   it("shows AI unavailable when aiTimedOut is true", () => {
@@ -73,8 +65,6 @@ describe("StructureCard — empty state", () => {
     expect(screen.queryByText(/no issue found/i)).not.toBeInTheDocument();
   });
 });
-
-// ─── Populated state ──────────────────────────────────────────────────────────
 
 describe("StructureCard — with sections", () => {
   const structure = makeStructure({
@@ -122,8 +112,6 @@ describe("StructureCard — with sections", () => {
     expect(screen.queryByText("Solid essay structure.")).not.toBeInTheDocument();
   });
 });
-
-// ─── Collapsible ──────────────────────────────────────────────────────────────
 
 describe("StructureCard — collapsible", () => {
   it("starts collapsed", () => {

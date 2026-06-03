@@ -10,7 +10,7 @@ import Groq from "groq-sdk";
 import { resolveAnnotationPages } from "../feedback/annotation-utils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-const GOOGLE_MODEL = "gemini-3.1-flash-lite-preview";
+const GOOGLE_MODEL = "gemini-3.1-flash-lite";
 const MAX_RETRIES = 3;
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });

@@ -1,17 +1,19 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import PdfViewerInner from "@/components/feedback/pdf-viewer-inner";
 import { Annotation } from "@/services/feedback/types";
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 jest.mock("react-pdf", () => ({
-  Document: ({ children, onLoadSuccess, loading, error, file }: any) => {
-    // Simulate successful load by default
-    if (onLoadSuccess) onLoadSuccess({ numPages: 3 });
+  Document: ({ children, onLoadSuccess }: any) => {
+    React.useEffect(() => {
+      if (onLoadSuccess) onLoadSuccess({ numPages: 3 });
+    }, []);
     return <div data-testid="pdf-document">{children}</div>;
   },
   Page: ({ pageNumber, onRenderSuccess }: any) => {
-    if (onRenderSuccess) onRenderSuccess();
+    React.useEffect(() => {
+      if (onRenderSuccess) onRenderSuccess();
+    }, []);
     return <div data-testid={`pdf-page-${pageNumber}`} />;
   },
   pdfjs: {
@@ -51,11 +53,8 @@ jest.mock("@/components/ui/button", () => ({
   ),
 }));
 
-// css imports that jest can't handle
 jest.mock("react-pdf/dist/Page/TextLayer.css", () => {});
 jest.mock("react-pdf/dist/Page/AnnotationLayer.css", () => {});
-
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const baseProps = {
   fileUrl: "http://example.com/test.pdf",
@@ -65,66 +64,63 @@ const baseProps = {
   onPageRefsReady: jest.fn(),
 };
 
-// ─── Tests ───────────────────────────────────────────────────────────────────
-
 describe("PdfViewerInner — rendering", () => {
-  it("renders the PDF document", () => {
+  it("renders the PDF document", async () => {
     render(<PdfViewerInner {...baseProps} />);
-    expect(screen.getByTestId("pdf-document")).toBeInTheDocument();
+    expect(await screen.findByTestId("pdf-document")).toBeInTheDocument();
   });
 
-  it("renders all pages returned by onLoadSuccess", () => {
+  it("renders all pages returned by onLoadSuccess", async () => {
     render(<PdfViewerInner {...baseProps} />);
-    expect(screen.getByTestId("pdf-page-1")).toBeInTheDocument();
+    expect(await screen.findByTestId("pdf-page-1")).toBeInTheDocument();
     expect(screen.getByTestId("pdf-page-2")).toBeInTheDocument();
     expect(screen.getByTestId("pdf-page-3")).toBeInTheDocument();
   });
 
-  it("calls onPageRefsReady after document loads", () => {
+  it("calls onPageRefsReady after document loads", async () => {
     render(<PdfViewerInner {...baseProps} />);
-    expect(baseProps.onPageRefsReady).toHaveBeenCalledWith(expect.any(Map));
+    await waitFor(() =>
+      expect(baseProps.onPageRefsReady).toHaveBeenCalledWith(expect.any(Map))
+    );
   });
 });
 
 describe("PdfViewerInner — zoom controls", () => {
-  it("renders zoom in and zoom out buttons", () => {
+  it("renders zoom in and zoom out buttons", async () => {
     render(<PdfViewerInner {...baseProps} />);
-    // 100% is the default scale display
-    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(await screen.findByText("100%")).toBeInTheDocument();
   });
 
-  it("zoom out button is disabled at minimum scale (0.5)", () => {
+  it("zoom out button is disabled at minimum scale (0.5)", async () => {
     render(<PdfViewerInner {...baseProps} />);
+    await screen.findByTestId("pdf-document");
     const [zoomOut] = screen.getAllByRole("button");
-
-    // click zoom out 5 times to reach 0.5
     for (let i = 0; i < 5; i++) fireEvent.click(zoomOut);
     expect(zoomOut).toBeDisabled();
   });
 
-  it("zoom in button is disabled at maximum scale (2.0)", () => {
+  it("zoom in button is disabled at maximum scale (2.0)", async () => {
     render(<PdfViewerInner {...baseProps} />);
+    await screen.findByTestId("pdf-document");
     const buttons = screen.getAllByRole("button");
     const zoomIn = buttons[buttons.length - 1];
-
-    // click zoom in 10 times to reach 2.0
     for (let i = 0; i < 10; i++) fireEvent.click(zoomIn);
     expect(zoomIn).toBeDisabled();
   });
 
-  it("updates the scale display when zooming in", () => {
+  it("updates the scale display when zooming in", async () => {
     render(<PdfViewerInner {...baseProps} />);
+    await screen.findByTestId("pdf-document");
     const buttons = screen.getAllByRole("button");
     const zoomIn = buttons[buttons.length - 1];
-
     fireEvent.click(zoomIn);
     expect(screen.getByText("110%")).toBeInTheDocument();
   });
 
-  it("updates the scale display when zooming out", () => {
+  it("updates the scale display when zooming out", async () => {
     render(<PdfViewerInner {...baseProps} />);
+    await screen.findByTestId("pdf-document");
     const [zoomOut] = screen.getAllByRole("button");
-
     fireEvent.click(zoomOut);
     expect(screen.getByText("90%")).toBeInTheDocument();
   });

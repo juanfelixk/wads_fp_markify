@@ -2,8 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import AnnotationSidebar from "@/components/feedback/annotation-card";
 import { Annotation } from "@/services/feedback/types";
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 jest.mock("@/services/feedback/constants", () => ({
   annotationStyle: {
     PRAISE: {
@@ -39,8 +37,6 @@ jest.mock("@/components/ui/card", () => ({
   ),
 }));
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
-
 const makeAnnotation = (overrides: Partial<Annotation> = {}): Annotation => ({
   id: "ann-1",
   type: "ISSUE",
@@ -50,8 +46,6 @@ const makeAnnotation = (overrides: Partial<Annotation> = {}): Annotation => ({
   source: "AI",
   ...overrides,
 });
-
-// ─── Empty-state tests ────────────────────────────────────────────────────────
 
 describe("AnnotationSidebar — empty state", () => {
   it("renders the AI unavailable message when aiTimedOut is true", () => {
@@ -107,11 +101,9 @@ describe("AnnotationSidebar — empty state", () => {
       />
     );
 
-    // The outer Card receives border-dashed only in the empty-state branch
     expect(screen.getByTestId("card")).toHaveClass("border-dashed");
   });
 
-  // Edge: aiTimedOut takes priority over status === "TO_BE_REVIEWED"
   it("shows AI timeout message even when status is TO_BE_REVIEWED", () => {
     render(
       <AnnotationSidebar
@@ -129,8 +121,6 @@ describe("AnnotationSidebar — empty state", () => {
     expect(screen.queryByText(/no issue found/i)).not.toBeInTheDocument();
   });
 });
-
-// ─── Populated-state tests ────────────────────────────────────────────────────
 
 describe("AnnotationSidebar — with annotations", () => {
   const annotations: Annotation[] = [
@@ -223,17 +213,13 @@ describe("AnnotationSidebar — with annotations", () => {
       />
     );
 
-    // ann-3 has no quote — its content should still render
     expect(screen.getByText("Consider adding examples.")).toBeInTheDocument();
-    // Ensure no empty quote element exists for ann-3
     const quotes = screen.queryAllByText(/^".*"$/);
     quotes.forEach((q) => {
       expect(q.textContent).not.toBe('""');
     });
   });
 });
-
-// ─── Interaction tests ────────────────────────────────────────────────────────
 
 describe("AnnotationSidebar — interactions", () => {
   const annotations: Annotation[] = [
@@ -263,7 +249,7 @@ describe("AnnotationSidebar — interactions", () => {
     render(
       <AnnotationSidebar
         annotations={annotations}
-        activeId="ann-1"   // ann-1 is currently active
+        activeId="ann-1"
         onSelect={onSelect}
         status="TO_BE_REVIEWED"
       />

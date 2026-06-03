@@ -259,7 +259,7 @@ export default function LecturerAssignmentPage() {
                     ) : (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button className="gap-1.5 cursor-pointer bg-primary/90 hover:bg-primary" disabled={publishing || !allGraded} title={!allGraded ? "All submitted assignments must be graded before publishing" : undefined}>
+                                <Button className="gap-1.5 cursor-pointer bg-primary/90 hover:bg-primary" disabled={publishing || !allGraded || stats.submitted === 0} title={!allGraded ? "All submitted assignments must be graded before publishing" : undefined}>
                                     {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BadgeCheck className="w-3.5 h-3.5" />}
                                     Publish Grades
                                 </Button>
@@ -310,7 +310,7 @@ export default function LecturerAssignmentPage() {
                                 {filtered.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-10">
-                                            No submissions match your filters.
+                                            Couldn't resolve any submissions.
                                         </TableCell>
                                     </TableRow>
                                 ) : (

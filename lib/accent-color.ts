@@ -16,6 +16,7 @@ function hashString(str: string): number {
 }
 
 export function getAccentColor(key: string): string {
-    const index = hashString(key) % ACCENT_COLORS.length;
-    return ACCENT_COLORS[index];
+    const h = hashString(key);
+    const mixed = Math.abs(h ^ (h >>> 7) ^ (h >>> 13) ^ (h >>> 19)) % ACCENT_COLORS.length;
+    return ACCENT_COLORS[mixed];
 }

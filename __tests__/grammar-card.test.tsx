@@ -2,10 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import GrammarCard from "@/components/feedback/grammar-card";
 import { GrammarFeedback } from "@/services/feedback/types";
 
-// 1 FAILURE
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
-
 jest.mock("@/components/ui/card", () => ({
   Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
     <div data-testid="card" className={className}>{children}</div>
@@ -23,12 +19,10 @@ jest.mock("@/components/ui/card", () => ({
 
 jest.mock("@/components/ui/collapsible", () => ({
   Collapsible: ({ children, open, onOpenChange }: { children: React.ReactNode; open: boolean; onOpenChange: (v: boolean) => void }) => (
-    <div data-testid="collapsible" data-open={open}>{children}</div>
+    <div data-testid="collapsible" data-open={String(open)}>{children}</div>
   ),
-  CollapsibleTrigger: ({ children, asChild }: { children: React.ReactNode; asChild?: boolean }) => (
-    <div data-testid="collapsible-trigger" onClick={() => {
-      // simulate trigger — tests fire clicks on card-header directly
-    }}>{children}</div>
+  CollapsibleTrigger: ({ children }: { children: React.ReactNode; asChild?: boolean }) => (
+    <>{children}</>
   ),
   CollapsibleContent: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="collapsible-content">{children}</div>
@@ -40,8 +34,6 @@ jest.mock("@/components/ui/badge", () => ({
     <span data-testid="badge" className={className}>{children}</span>
   ),
 }));
-
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const makeIssue = (overrides = {}) => ({
   type: "grammar",
@@ -57,8 +49,6 @@ const makeGrammar = (overrides: Partial<GrammarFeedback> = {}): GrammarFeedback 
   issues: [makeIssue()],
   ...overrides,
 });
-
-// ─── Empty-state tests ────────────────────────────────────────────────────────
 
 describe("GrammarCard — empty state", () => {
   it("renders AI unavailable message when aiTimedOut is true", () => {
@@ -96,15 +86,12 @@ describe("GrammarCard — empty state", () => {
     expect(screen.getByText(/no issue found/i)).toBeInTheDocument();
   });
 
-  // aiTimedOut takes priority over terminal statuses
   it("shows AI timeout message even when status is GRADED", () => {
     render(<GrammarCard grammar={null} aiTimedOut={true} status="GRADED" />);
     expect(screen.getByText(/AI currently unavailable/i)).toBeInTheDocument();
     expect(screen.queryByText(/no issue found/i)).not.toBeInTheDocument();
   });
 });
-
-// ─── Populated-state tests ────────────────────────────────────────────────────
 
 describe("GrammarCard — with issues", () => {
   const grammar = makeGrammar({
@@ -118,7 +105,6 @@ describe("GrammarCard — with issues", () => {
   it("renders the issue count badge", () => {
     render(<GrammarCard grammar={grammar} status="TO_BE_REVIEWED" />);
     const badges = screen.getAllByTestId("badge");
-    // First badge is the issue count
     expect(badges[0]).toHaveTextContent("2");
   });
 
@@ -165,7 +151,6 @@ describe("GrammarCard — with issues", () => {
   it("does not render original when it is absent", () => {
     const g = makeGrammar({ issues: [makeIssue({ original: undefined })] });
     render(<GrammarCard grammar={g} status="TO_BE_REVIEWED" />);
-    // Only the suggestion and explanation should be present
     expect(screen.queryByText("He go to school.")).not.toBeInTheDocument();
   });
 
@@ -181,8 +166,6 @@ describe("GrammarCard — with issues", () => {
     expect(screen.queryByText("A few grammatical issues were found.")).not.toBeInTheDocument();
   });
 });
-
-// ─── Collapsible interaction tests ───────────────────────────────────────────
 
 describe("GrammarCard — collapsible behaviour", () => {
   it("starts collapsed by default", () => {
