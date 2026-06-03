@@ -37,10 +37,10 @@ function RubricModal({ open, onClose, criteria, onChange }: RubricModalProps) {
 
     // keep draft in sync when modal reopens with existing data
     useEffect(() => {
-        if (open) {
-            setDraft(criteria.length > 0 ? criteria : [emptycriterion()]);
-        }
-    }, [open, criteria]);
+        if (!open) return;
+        const initial = criteria.length > 0 ? criteria : [emptycriterion()];
+        setDraft(initial);
+    }, [open]);
 
     const update = (i: number, field: keyof RubricCriterion, value: string | number) => {
         setDraft((prev) => prev.map((c, idx) => idx === i ? { ...c, [field]: value } : c));

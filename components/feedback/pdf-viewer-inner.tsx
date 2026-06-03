@@ -42,7 +42,7 @@ export default function PdfViewerInner({ fileUrl, annotations, activeAnnotation,
   useEffect(() => {
     if (!fileUrl) return;
     pageTextsRef.current.clear();
-    setPageTextsReady(false);
+    setTimeout(() => setPageTextsReady(false), 0);
 
     const loadingTask = pdfjs.getDocument(fileUrl);
 

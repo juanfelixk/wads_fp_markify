@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, FileText, Clock, Award, Upload, Eye, Shield, Lock, History, CheckCircle, AlertCircle, ChevronRight, BookOpen, User, Info, CloudUpload } from "lucide-react";
@@ -223,7 +223,10 @@ export default function AssignmentPage() {
     const deadlineState = getDeadlineState(data.endDate);
     const isGraded = data.submission?.status === "GRADED";
     const isNotSubmitted = !data.submission || data.submission.status === "NOT_SUBMITTED";
-    const isLate = new Date(data.endDate).getTime() < Date.now();
+
+    const now = useMemo(() => Date.now(), []);
+    const isLate = new Date(data.endDate).getTime() < now;
+
     const lateAllowed = data.lateAllowed ?? false;
     const isSubmissionBlocked = isGraded || (isLate && !lateAllowed);
 
