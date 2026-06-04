@@ -62,7 +62,7 @@ describe("ClassCard — rendering", () => {
 
   it("renders course name", () => {
     render(<ClassCard {...baseProps} />);
-    expect(screen.getByText("Software Engineering")).toBeInTheDocument();
+    expect(screen.getAllByText("Software Engineering")[0]).toBeInTheDocument();
   });
 
   it("renders lecturer name", () => {

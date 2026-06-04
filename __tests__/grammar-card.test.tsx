@@ -19,7 +19,7 @@ jest.mock("@/components/ui/card", () => ({
 
 jest.mock("@/components/ui/collapsible", () => ({
   Collapsible: ({ children, open, onOpenChange }: { children: React.ReactNode; open: boolean; onOpenChange: (v: boolean) => void }) => (
-    <div data-testid="collapsible" data-open={String(open)}>{children}</div>
+    <div data-testid="collapsible" data-open={String(open)} onClick={() => onOpenChange(!open)}>{children}</div>
   ),
   CollapsibleTrigger: ({ children }: { children: React.ReactNode; asChild?: boolean }) => (
     <>{children}</>
