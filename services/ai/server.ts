@@ -9,12 +9,9 @@ import { GradingResult } from "./types";
 import Groq from "groq-sdk";
 import { resolveAnnotationPages } from "../feedback/annotation-utils";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const GOOGLE_MODEL = "gemini-3.1-flash-lite";
-const MAX_RETRIES = 3;
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 const GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+const MAX_RETRIES = 3;
 
 // prompt
 function buildPrompt(rubric: RubricCriterion[], maxPoints: number, assignmentTitle: string, instructions: string | null): string {
@@ -138,6 +135,7 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
 // call gemini with limited retry
 async function callGemini(pdfBase64: string, prompt: string, attempt = 1): Promise<GradingResult> {
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: GOOGLE_MODEL });
     const result = await model.generateContent({
       contents: [
@@ -170,6 +168,7 @@ async function callGemini(pdfBase64: string, prompt: string, attempt = 1): Promi
 // call llama
 async function callLlama(text: string, prompt: string, attempt = 1): Promise<GradingResult> {
   try {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
     const completion = await groq.chat.completions.create({
       model: GROQ_MODEL,
       messages: [
