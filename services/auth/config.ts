@@ -3,11 +3,11 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
 import { enrollStudent } from "@/services/classes/server";
 import { hash } from "bcryptjs";
-//
+
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
   trustedOrigins: ["https://e2526-wads-b4bc-03.csbihub.id"],
-  baseURL: "https://e2526-wads-b4bc-03.csbihub.id",
+  baseURL: "http://localhost:3024",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
