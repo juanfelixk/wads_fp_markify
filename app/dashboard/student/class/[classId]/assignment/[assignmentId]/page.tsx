@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, FileText, Clock, Award, Upload, Eye, Shield, Lock, History, CheckCircle, AlertCircle, ChevronRight, BookOpen, User, Info, CloudUpload } from "lucide-react";
@@ -191,7 +191,7 @@ export default function AssignmentPage() {
     const [loading, setLoading] = useState(true);
     const [rubricOpen, setRubricOpen] = useState(false);
 
-    const now = useMemo(() => Date.now(), []);
+    const [now] = useState(() => Date.now());
 
     useEffect(() => {
         fetchAssignmentPageData(classId, assignmentId)
