@@ -191,6 +191,8 @@ export default function AssignmentPage() {
     const [loading, setLoading] = useState(true);
     const [rubricOpen, setRubricOpen] = useState(false);
 
+    const now = useMemo(() => Date.now(), []);
+
     useEffect(() => {
         fetchAssignmentPageData(classId, assignmentId)
             .then(setData)
@@ -224,7 +226,6 @@ export default function AssignmentPage() {
     const isGraded = data.submission?.status === "GRADED";
     const isNotSubmitted = !data.submission || data.submission.status === "NOT_SUBMITTED";
 
-    const now = useMemo(() => Date.now(), []);
     const isLate = new Date(data.endDate).getTime() < now;
 
     const lateAllowed = data.lateAllowed ?? false;

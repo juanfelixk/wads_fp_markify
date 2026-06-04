@@ -39,6 +39,7 @@ function RubricModal({ open, onClose, criteria, onChange }: RubricModalProps) {
     useEffect(() => {
         if (!open) return;
         const initial = criteria.length > 0 ? criteria : [emptycriterion()];
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setDraft(initial);
     }, [open]);
 
