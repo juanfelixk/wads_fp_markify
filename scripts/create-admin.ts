@@ -45,7 +45,7 @@ async function main() {
 
   await prisma.user.update({
     where: { id: result.user.id },
-    data: { role: "ADMIN", status: "ACTIVE", emailVerified: true, institution: institution },
+    data: { role: "ADMIN", emailVerified: true, institution: institution },
   });
 
   console.log(`Admin account created for ${email} (id: ${result.user.id})`);
