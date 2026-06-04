@@ -200,7 +200,7 @@ describe("AnnotationSidebar — with annotations", () => {
       />
     );
 
-    expect(screen.getByText((_, el) => el?.textContent === '"bad phrasing"')).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el?.tagName === 'P' && el?.textContent?.includes('bad phrasing'))).toBeInTheDocument();
   });
 
   it("does not render a quote element when quote is absent", () => {
