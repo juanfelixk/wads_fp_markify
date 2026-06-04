@@ -7,7 +7,7 @@ import { hash } from "bcryptjs";
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
   trustedOrigins: ["https://e2526-wads-b4bc-03.csbihub.id"],
-  baseURL: "https://e2526-wads-b4bc-03.csbihub.id",
+  baseURL: "http://localhost:3024",
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -18,6 +18,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      redirectURI: "https://e2526-wads-b4bc-03.csbihub.id/api/v1/auth/callback/google",
     },
   },
   user: {

@@ -55,13 +55,15 @@ Markify is well-suited to the problem because it meets the needs of both sides o
 
 ### 5.1 Architecture Diagram
 ![Architecture Diagram](assets/arch_diagram.png)
+
+### 5.2 Module Diagram
 ![Module Diagram](assets/module_diagram.png)
 
-### 5.2 Architecture Explanation
+### 5.3 Architecture Explanation
 
 Markify follows a modular monolith architecture consisting of a frontend layer, backend API layer, service layer, and database layer. Users interact with the application through web pages and forms for authentication, essay submission, grading, and feedback viewing. Frontend components communicate with the backend through service client functions that send HTTP requests to API endpoints. The API layer acts as an entry point for all requests. API routes receive requests from the frontend, validate input data, verify authentication status, and forward the requests to the appropriate service module. The service layer contains the core business logic of the system. These services interact with external providers such as Gemini and Groq for AI-based grading and feedback generation. The database layer uses PostgreSQL hosted on Neon. Data access is performed through Prisma ORM, which handles database queries and persistence.
 
-### 5.3 Security Implementation
+### 5.4 Security Implementation
 
 Authentication is handled using Better Auth with Google OAuth integration. Protected API routes verify user identity before granting access to application resources.  
 The database is not directly accessible from the frontend. All database interactions occur through backend service modules and Prisma ORM.  
@@ -258,8 +260,32 @@ If the primary AI model (Gemini) fails due to unavailability or rate limiting, t
 Dockerfile and docker-compose.yml are included.
 
 ### 11.2 Production Environment
+The Markify production environment is deployed on csbiweb using a Docker-based deployment pipeline integrated with GitHub Actions. The system is containerized to ensure consistent execution across development and production environments.
 
-...
+### Environment Variables
+All application configuration is managed through environment variables. These include database connection strings, authentication credentials, storage configuration, and AI service API keys. No sensitive values are hardcoded in the source code.
+
+Environment variables used in production include:
+- Database URL (PostgreSQL on Neon)
+- Authentication secrets (Better Auth, session encryption)
+- Google OAuth credentials (Client ID and Client Secret)
+- Backblaze B2 storage keys and bucket configuration
+- Gemini and Groq API keys for AI services
+- Application base URL and runtime configuration
+
+These variables are injected into the Docker runtime during deployment and are required for the application to initialize correctly.
+
+### Secrets Handling
+Sensitive configuration values are stored securely in GitHub Secrets. During the CI/CD pipeline execution, GitHub Actions injects these secrets into the Docker build and deployment process without exposing them in logs or source code.
+
+Secrets are only accessible at runtime within the server environment and are never exposed to the client-side bundle. This ensures that credentials such as API keys, database URLs, and authentication secrets remain protected throughout the deployment lifecycle.
+
+The repository does not contain any hardcoded secrets, and all sensitive data is isolated from version control to prevent accidental exposure.
+
+### HTTPS Configuration
+HTTPS is automatically handled by the csbihub hosting platform. All deployed services are served over secure TLS connections without requiring manual certificate management.
+
+This ensures that all data transmitted between the client and server, including authentication tokens, API requests, and file uploads, is encrypted in transit. No additional reverse proxy or custom SSL configuration is required in the current deployment setup.
 
 ### 11.3 Live Application URL
 https://e2526-wads-b4bc-03.csbihub.id/
@@ -308,4 +334,18 @@ All AI-assisted content and code was reviewed, validated, and taken responsibili
 We declare that this project is our own original work, all AI tool usage has been disclosed honestly in Section 13, and every group member has reviewed, understands, and can explain the system in its entirety. We take full responsibility for all code, documentation, and design decisions presented in this project report.
 
 ## 16. Deployment Instructions
-...
+### CI/CD Deployment
+Markify is deployed automatically through a CI/CD pipeline connected to GitHub Actions. When changes are pushed to the main branch, the pipeline:
+1. Builds the Docker image
+2. Injects environment variables from GitHub Secrets
+3. Pushes the build to csbiweb
+4. Triggers deployment on the csbihub platform
+
+### Running locally
+```bash
+# Install dependencies
+npm install
+
+# Build application
+npm run dev
+```
