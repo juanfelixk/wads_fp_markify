@@ -2,14 +2,24 @@ name: markify
 
 services:
   app:
-    image: ${DOCKER_USERNAME:-local}/markify:latest
+    image: ${DOCKER_USERNAME}/markify:latest
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://e2526-wads-b4bc-03.csbihub.id}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
         NEXT_PUBLIC_API_DOCS_ENABLED: ${NEXT_PUBLIC_API_DOCS_ENABLED:-true}
-        NEXT_PUBLIC_BETTER_AUTH_URL: ${NEXT_PUBLIC_BETTER_AUTH_URL:-https://e2526-wads-b4bc-03.csbihub.id}
+        NEXT_PUBLIC_BETTER_AUTH_URL: ${NEXT_PUBLIC_BETTER_AUTH_URL}
+        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+        BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        GEMINI_API_KEY: ${GEMINI_API_KEY}
+        GROQ_API_KEY: ${GROQ_API_KEY}
+        STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
+        STORAGE_BUCKET: ${STORAGE_BUCKET}
+        STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
+        STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
     env_file:
       - .env.production
     ports:
