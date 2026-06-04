@@ -6,6 +6,7 @@ import { hash } from "bcryptjs";
 
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
+  trustedOrigins: ["https://e2526-wads-b4bc-03.csbihub.id"],
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),

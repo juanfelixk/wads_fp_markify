@@ -13,7 +13,7 @@ import { authClient } from "@/services/auth/client";
 import { toast } from "sonner";
 import { fetchCourses, fetchCourseClasses, updateCourseClient } from "@/services/admin/client";
 import { CourseSummary, CourseClass } from "@/services/admin/types";
-//
+
 const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
