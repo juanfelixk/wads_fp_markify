@@ -1,5 +1,7 @@
 import swaggerJSDoc from "swagger-jsdoc";
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+
 const options = {
   definition: {
     openapi: "3.0.0",
@@ -10,7 +12,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/api",
+        url: `${baseUrl}/api`,
       },
     ],
   },

@@ -3,7 +3,7 @@ import { inferAdditionalFields } from "better-auth/client/plugins";
 import type { auth } from "./config";
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL,
   basePath: "/api/v1/auth",
   plugins: [
     inferAdditionalFields<typeof auth>()
@@ -30,7 +30,7 @@ export async function loginWithEmail(email: string, password: string) {
 }
 
 export async function fetchSecurityQuestions(email: string) {
-  const res = await fetch("/api/v1/auth/reset-password/questions", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/reset-password/questions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -41,7 +41,7 @@ export async function fetchSecurityQuestions(email: string) {
 }
 
 export async function submitResetPassword( email: string, answer1: string, answer2: string, newPassword: string) {
-  const res = await fetch("/api/v1/auth/reset-password", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/v1/auth/reset-password`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, answer1, answer2, newPassword }),
