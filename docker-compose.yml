@@ -2,6 +2,9 @@ name: markify
 
 services:
   app:
+    environment:
+      - NODE_DEBUG=https,http,net
+      - NODE_OPTIONS=--trace-warnings --trace-deprecation
     image: ${DOCKER_USERNAME}/markify:latest
     build:
       context: .
@@ -10,21 +13,13 @@ services:
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
         NEXT_PUBLIC_API_DOCS_ENABLED: ${NEXT_PUBLIC_API_DOCS_ENABLED:-true}
         NEXT_PUBLIC_BETTER_AUTH_URL: ${NEXT_PUBLIC_BETTER_AUTH_URL}
-        BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-        BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-        GEMINI_API_KEY: ${GEMINI_API_KEY}
-        GROQ_API_KEY: ${GROQ_API_KEY}
-        STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
-        STORAGE_BUCKET: ${STORAGE_BUCKET}
-        STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
-        STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
     env_file:
       - .env.production
     ports:
       - "3024:3024"
     restart: unless-stopped
+    extra_hosts:
+      - "e2526-wads-b4bc-03.csbihub.id:host-gateway"
 
   db-schema-sync:
     profiles: ["migrate"]

@@ -67,16 +67,6 @@ jobs:
             NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }}
             NEXT_PUBLIC_API_DOCS_ENABLED=${{ secrets.NEXT_PUBLIC_API_DOCS_ENABLED }}
             NEXT_PUBLIC_BETTER_AUTH_URL=${{ secrets.NEXT_PUBLIC_BETTER_AUTH_URL }}
-            BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }}
-            BETTER_AUTH_URL=${{ secrets.BETTER_AUTH_URL }}
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
-            STORAGE_ENDPOINT=${{ secrets.STORAGE_ENDPOINT }}
-            STORAGE_BUCKET=${{ secrets.STORAGE_BUCKET }}
-            STORAGE_ACCESS_KEY=${{ secrets.STORAGE_ACCESS_KEY }}
-            STORAGE_SECRET_KEY=${{ secrets.STORAGE_SECRET_KEY }}
 
   deploy:
     needs: build
