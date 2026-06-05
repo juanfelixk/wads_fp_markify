@@ -6,8 +6,14 @@ import { hash } from "bcryptjs";
 
 export const auth = betterAuth({
   basePath: "/api/v1/auth",
-  trustedOrigins: [process.env.BETTER_AUTH_URL!],
   baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL!,
+    process.env.NEXT_PUBLIC_BETTER_AUTH_URL!,
+  ],
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+  },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -18,7 +24,7 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirectURI: `${process.env.BETTER_AUTH_URL}/api/v1/auth/callback/google`,
+      redirectURI: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/v1/auth/callback/google`,
     },
   },
   user: {

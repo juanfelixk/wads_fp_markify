@@ -18,8 +18,6 @@ services:
     ports:
       - "3024:3024"
     restart: unless-stopped
-    extra_hosts:
-      - "e2526-wads-b4bc-03.csbihub.id:host-gateway"
 
   db-schema-sync:
     profiles: ["migrate"]
