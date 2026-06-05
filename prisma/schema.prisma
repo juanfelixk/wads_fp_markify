@@ -110,7 +110,7 @@ model Class {
   academicYear String
   enrollmentKey String
 
-  courseIdString
+  courseId String
   course Course @relation(fields: [courseId], references: [id])
   lecturerId String
   lecturer User @relation("LecturerClasses", fields: [lecturerId], references: [id])
