@@ -1,8 +1,5 @@
-import { betterFetch } from "@better-fetch/fetch";
-import type { auth } from "@/services/auth/config";
+import { auth } from "@/services/auth/config";
 import { NextRequest, NextResponse } from "next/server";
-
-type SessionData = typeof auth.$Infer.Session;
 
 export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
@@ -11,9 +8,8 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(new URL("/auth/login", req.url))
     }
 
-    const { data: session } = await betterFetch<SessionData>("/api/v1/auth/get-session", {
-        baseURL: req.nextUrl.origin,
-        headers: { cookie: req.headers.get("cookie") ?? "" },
+    const session = await auth.api.getSession({
+        headers: req.headers,
     });
 
     // redirect to login if no session
