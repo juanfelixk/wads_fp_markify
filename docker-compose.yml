@@ -2,9 +2,6 @@ name: markify
 
 services:
   app:
-    environment:
-      - NODE_DEBUG=https,http,net
-      - NODE_OPTIONS=--trace-warnings --trace-deprecation
     image: ${DOCKER_USERNAME}/markify:latest
     build:
       context: .

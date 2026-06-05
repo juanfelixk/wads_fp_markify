@@ -33,10 +33,6 @@ import { updateCourse } from "@/services/admin/server";
  *     responses:
  *       200:
  *         description: Updated course
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Course'
  *       400:
  *         description: Course code and name are required
  *       401:

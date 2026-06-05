@@ -1,4 +1,5 @@
 import swaggerJSDoc from "swagger-jsdoc";
+import path from "path";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL
 
@@ -16,7 +17,7 @@ const options = {
       },
     ],
   },
-  apis: ["app/api/**/*.ts"],
+  apis: [path.join(process.cwd(), "app/api/**/*.ts")],
 };
 
 export const swaggerSpec = swaggerJSDoc(options);

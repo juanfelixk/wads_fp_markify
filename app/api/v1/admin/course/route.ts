@@ -26,10 +26,6 @@ import { getCourses, registerCourse } from "@/services/admin/server";
  *     responses:
  *       201:
  *         description: Course created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Course'
  *       400:
  *         description: Course code and name are required
  *       401:
@@ -45,12 +41,6 @@ import { getCourses, registerCourse } from "@/services/admin/server";
  *     responses:
  *       200:
  *         description: List of courses
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Course'
  *       401:
  *         description: Unauthorized
  *       403:
