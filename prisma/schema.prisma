@@ -24,101 +24,101 @@ enum SubmissionStatus {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  name            String?
-  email           String   @unique
-  emailVerified   Boolean  @default(false)
-  image           String?
-  role            Role     @default(STUDENT)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id String @id @default(cuid())
+  name String?
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  role Role @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   institution String?
 
   // security questions for password recovery
-  securityQuestion1  String?
-  securityAnswer1    String? // hashed
-  securityQuestion2  String?
-  securityAnswer2    String? // hashed
+  securityQuestion1 String?
+  securityAnswer1  String? // hashed
+  securityQuestion2 String?
+  securityAnswer2 String? // hashed
 
-  accounts        Account[]
-  sessions        Session[]
-  lecturerClasses Class[]      @relation("LecturerClasses")
-  enrollments     Enrollment[] @relation("StudentEnrollments")
-  submissions     Submission[] @relation("StudentSubmissions")
+  accounts Account[]
+  sessions Session[]
+  lecturerClasses Class[] @relation("LecturerClasses")
+  enrollments Enrollment[] @relation("StudentEnrollments")
+  submissions Submission[] @relation("StudentSubmissions")
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
+  id String @id @default(cuid())
+  token String @unique
+  userId String
   expiresAt DateTime
   ipAddress String?
   userAgent String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Account {
-  id                    String    @id @default(cuid())
-  userId                String
-  accountId             String
-  providerId            String
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
+  id String @id @default(cuid())
+  userId String
+  accountId String
+  providerId String
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
   refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user                  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
   @@index([userId])
 }
 
 model Verification {
-  id         String   @id @default(cuid())
+  id String @id @default(cuid())
   identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Course {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  name        String
-  institution String   @default("BINUS University International")
+  id String @id @default(cuid())
+  code String @unique
+  name String
+  institution String @default("BINUS University International")
 
-  classes     Class[]
+  classes Class[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Class {
-  id            String   @id @default(cuid())
-  code          String
-  academicYear  String
+  id String @id @default(cuid())
+  code String
+  academicYear String
   enrollmentKey String
 
-  courseId      String
-  course        Course       @relation(fields: [courseId], references: [id])
-  lecturerId    String
-  lecturer      User         @relation("LecturerClasses", fields: [lecturerId], references: [id])
-  enrollments   Enrollment[]
-  assignments   Assignment[]
+  courseIdString
+  course Course @relation(fields: [courseId], references: [id])
+  lecturerId String
+  lecturer User @relation("LecturerClasses", fields: [lecturerId], references: [id])
+  enrollments Enrollment[]
+  assignments Assignment[]
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([courseId, code, academicYear])
   @@index([courseId])
@@ -126,12 +126,12 @@ model Class {
 }
 
 model Enrollment {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
   studentId String
-  classId   String
+  classId String
 
-  student   User     @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
-  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student User @relation("StudentEnrollments", fields: [studentId], references: [id], onDelete: Cascade)
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -141,50 +141,50 @@ model Enrollment {
 }
 
 model Assignment {
-  id           String   @id @default(cuid())
-  title        String
+  id String @id @default(cuid())
+  title String
   instructions String?
-  maxPoints    Int?
-  rubric       Json?
+  maxPoints Int?
+  rubric Json?
   lateAllowed Boolean? @default(false)
 
-  classId      String
-  class        Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
-  submissions  Submission[]
+  classId String
+  class Class@relation(fields: [classId], references: [id], onDelete: Cascade)
+  submissions Submission[]
   gradesPublishedAt DateTime?
 
-  startDate    DateTime
-  endDate      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  startDate DateTime
+  endDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([classId])
 }
 
 model Submission {
-  id           String           @id @default(cuid())
-  status       SubmissionStatus @default(NOT_SUBMITTED)
-  fileUrl      String?
-  fileName     String?
-  fileSize     Int?
-  aiScore      Int?
-  finalScore   Int?
-  comment      String?
-  aiGrammarFeedback    Json?   // stores grammar & style analysis results
-  aiStructureFeedback  Json?   // stores essay structure evaluation results
+  id String @id @default(cuid())
+  status SubmissionStatus @default(NOT_SUBMITTED)
+  fileUrl String?
+  fileName String?
+  fileSize Int?
+  aiScore Int?
+  finalScore Int?
+  comment String?
+  aiGrammarFeedback Json?
+  aiStructureFeedback Json?
   isIrrelevant Boolean @default(false)
 
   assignmentId String
-  assignment   Assignment         @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  studentId    String
-  student      User               @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
-  versions     SubmissionVersion[]
-  annotations  SubmissionAnnotation[]
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  studentId String
+  student User @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+  versions SubmissionVersion[]
+  annotations SubmissionAnnotation[]
   criterionScores SubmissionCriterionScore[]
 
-  submittedAt  DateTime?
-  updatedAt    DateTime  @updatedAt
-  createdAt    DateTime  @default(now())
+  submittedAt DateTime?
+  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now())
 
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
@@ -193,36 +193,36 @@ model Submission {
 
 // tracks every file upload for a submission for full revision history
 model SubmissionVersion {
-  id           String   @id @default(cuid())
-  version      Int
-  fileUrl      String
-  fileName     String
-  fileSize     Int
-  uploadedAt   DateTime @default(now())
+  id String @id @default(cuid())
+  version Int
+  fileUrl String
+  fileName String
+  fileSize Int
+  uploadedAt DateTime @default(now())
 
   submissionId String
-  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
   @@index([submissionId])
 }
 
 model SubmissionAnnotation {
-  id           String   @id @default(cuid())
+  id String @id @default(cuid())
   submissionId String
-  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
-  page         Int       // which page the annotation is on
-  x            Float?     // position (percentage-based for responsiveness)
-  y            Float?
-  width        Float?    // for highlight/box annotations
-  height       Float?
-  content      String    // the feedback text
-  type         AnnotationType
+  page Int
+  x Float?
+  y Float?
+  width Float?
+  height Float?
+  content String
+  type AnnotationType
   quote String?
-  source       AnnotationSource @default(AI)  // AI or LECTURER
+  source AnnotationSource @default(AI)
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([submissionId])
 }
@@ -239,14 +239,14 @@ enum AnnotationSource {
 }
 
 model SubmissionCriterionScore {
-  id             String     @id @default(cuid())
-  submissionId   String
-  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  id String @id @default(cuid())
+  submissionId String
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
-  criterionName  String     // matches RubricCriterion.name
-  pointsAwarded  Int
-  pointsMax      Int
-  rationale      String     // AI's 1-2 sentence justification
+  criterionName String
+  pointsAwarded Int
+  pointsMax Int
+  rationale String     
 
   @@unique([submissionId, criterionName])
   @@index([submissionId])

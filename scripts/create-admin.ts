@@ -58,3 +58,4 @@ main().catch((err) => {
 });
 
 // npm run create-admin admin-binter@binus.ac.id Binus12345678 "BINUS University International" "Yohanes Saputra"
+// script pass testing for deployment
