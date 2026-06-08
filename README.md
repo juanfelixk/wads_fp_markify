@@ -9,9 +9,9 @@ Institution: BINUS University International
 **Project Domain:** Interactive Essay Grading Application  
 **Class:** L4BC  
 
-Live URL: https://e2526-wads-b4bc-03.csbihub.id/
-API Documentation: https://e2526-wads-b4bc-03.csbihub.id/docs
-Demo Video: https://youtu.be/PqqQFVUA0BI
+Live URL: https://e2526-wads-b4bc-03.csbihub.id/  
+API Documentation: https://e2526-wads-b4bc-03.csbihub.id/docs  
+Demo Video: https://youtu.be/PqqQFVUA0BI  
 
 ### Group Members
 
