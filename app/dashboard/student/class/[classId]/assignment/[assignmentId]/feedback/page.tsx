@@ -333,10 +333,10 @@ export default function FeedbackStudioPage() {
                         </>
                         ) : data ? (
                         <>
-                            {data.isIrrelevant ? (
-                                <IrrelevantBanner assignmentId={assignmentId} classId={classId} />
-                            ) : isPastVersion ? (
+                            {isPastVersion ? (
                                 <PastVersionBanner />
+                            ) : data.isIrrelevant ? (
+                                <IrrelevantBanner assignmentId={assignmentId} classId={classId} />
                             ) : (
                                 <>
                                     <ScoresCard data={data} aiTimedOut={aiTimedOut} />
