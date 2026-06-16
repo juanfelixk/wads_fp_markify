@@ -279,7 +279,7 @@ export async function gradeSubmission(assignmentId: string, studentId: string, p
           });
         }
       }
-    });
+    }, { timeout: 30000 });
     
     return { success: true };
   } catch (err) {
